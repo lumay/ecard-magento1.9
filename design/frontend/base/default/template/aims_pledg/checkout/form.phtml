@@ -1,0 +1,65 @@
+<?php
+/**
+ * AIMS
+ * @category   AIMS
+ * @package    Aims_Hypnia
+ * @copyright  Copyright (c) 2020 Unicode Systems. (http://www.unicodesystems.in)
+ * @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<div class="header-container pledg-container">
+    <div class="logo">
+        <img src="<?php echo $this->getLogoSrc() ?>" alt="<?php echo $this->getLogoAlt() ?>" />
+    </div>
+</div>
+
+
+<button id="trigger_pledg_form"></button>
+<div id="container_pledg_form"></div>
+
+<?php $_order = $this->getOrder(); ?>
+
+<script type="text/javascript">
+  var button = document.querySelector("#trigger_pledg_form");
+  var callBackFlag = false;
+  pledgObject = new Pledg(button, {
+    containerElement: document.querySelector('#container_pledg_form'),
+    signature : "<?php echo $this->getGeneratedSignature(); ?>",
+    showCloseButton: true,
+    // the function which triggers the payment
+    onSuccess: function (result) {
+      if(!callBackFlag) {
+        callBackFlag = true;
+        window.location.replace(
+          '<?php echo $this->getUrl('pledg/checkout/success', array('order_id' => $_order->getIncrementId()));?>' +
+          '?transaction_id=' + result.purchase.uid +
+          '&secret=' + btoa(
+          result.purchase.uid + '#<?php echo $_order->getPayment()->getMethod(); ?>#' +
+          '<?php echo $_order->getEntityId(); ?>#<?php echo $_order->getPayment()->getMethod(); ?>#' +
+          '<?php echo $this->getMerchantUid(); ?>'
+          )
+        );
+      }
+    },
+    onError: function (error) {
+      if(!callBackFlag) {
+        callBackFlag = true;
+        window.location.replace(
+          '<?php echo $this->getUrl('pledg/checkout/cancel', array('order_id' => $_order->getIncrementId()));?>' +
+          '?error=' + encodeURI(error.message)
+        );
+      }
+    },
+    onClose: function () {
+      if(!callBackFlag) {
+        callBackFlag = true;
+        window.location.replace(
+          '<?php echo $this->getUrl('pledg/checkout/cancel', array('order_id' => $_order->getIncrementId()));?>' +
+          '?error=' + encodeURI("Bouton Retour")
+        );
+      }
+    }
+  });
+
+  jQuery("#trigger_pledg_form").click();
+</script>

@@ -1,0 +1,159 @@
+<?xml version="1.0"?>
+<!--
+/**
+* AIMS
+* @category   AIMS
+* @package    Aims_Hypnia
+* @copyright  Copyright (c) 2020 Unicode Systems. (http://www.unicodesystems.in)
+* @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+*/
+-->
+<config>
+    <modules>
+        <Aims_Pledg>
+            <version>0.0.1</version>
+        </Aims_Pledg>
+    </modules>
+    <global>
+        <blocks>
+            <aims_pledg>
+                <class>Aims_Pledg_Block</class>
+            </aims_pledg>
+        </blocks>
+        <helpers>
+            <aims_pledg>
+                <class>Aims_Pledg_Helper</class>
+            </aims_pledg>
+        </helpers>
+        <models>
+            <aims_pledg>
+                <class>Aims_Pledg_Model</class>
+            </aims_pledg>
+        </models>
+        <events>
+            <payment_method_is_active>
+                <observers>
+                    <aims_pledg_payment_method_is_active>
+                        <type>singleton</type>
+                        <class>Aims_Pledg_Model_Observer</class>
+                        <method>paymentMethodAvailable</method>
+                    </aims_pledg_payment_method_is_active>
+                </observers>
+            </payment_method_is_active>
+        </events>
+    </global>
+    <frontend>
+        <routers>
+            <aims_pledg>
+                <use>standard</use>
+                <args>
+                    <module>Aims_Pledg</module>
+                    <frontName>pledg</frontName>
+                </args>
+            </aims_pledg>
+        </routers>
+        <layout>
+            <updates>
+                <aims_pledg>
+                    <file>aims_pledg.xml</file>
+                </aims_pledg>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Aims_Pledg>
+                    <files>
+                        <default>Aims_Pledg.csv</default>
+                    </files>
+                </Aims_Pledg>
+            </modules>
+        </translate>
+        <events>
+            <controller_action_predispatch>
+                <observers>
+                    <aims_pledg_payment_predispatch>
+                        <type>singleton</type>
+                        <class>Aims_Pledg_Model_Observer</class>
+                        <method>setPledgPaymentMethod</method>
+                    </aims_pledg_payment_predispatch>
+                </observers>
+            </controller_action_predispatch>
+        </events>
+    </frontend>
+    <default>
+        <payment>
+            <pledg_gateway>
+                <model>aims_pledg/method_gateway</model>
+                <staging>1</staging>
+                <active>0</active>
+                <title>Pledg</title>
+                <gateway_logo>aims_pledg/pledg_logo.png</gateway_logo>
+                <debug>0</debug>
+            </pledg_gateway>
+            <pledg_gateway_1>
+                <model>aims_pledg/method_gateway1</model>
+                <active>0</active>
+                <title>Pledg</title>
+                <description>Payer en plusieurs fois</description>
+                <seuil>0</seuil>
+                <order_status>pending</order_status>
+            </pledg_gateway_1>
+            <pledg_gateway_2>
+                <model>aims_pledg/method_gateway2</model>
+                <active>0</active>
+                <title>Pledg</title>
+                <description>Payer en plusieurs fois</description>
+                <seuil>0</seuil>
+                <order_status>pending</order_status>
+            </pledg_gateway_2>
+            <pledg_gateway_3>
+                <model>aims_pledg/method_gateway3</model>
+                <active>0</active>
+                <title>Pledg</title>
+                <description>Payer en plusieurs fois</description>
+                <seuil>0</seuil>
+                <order_status>pending</order_status>
+            </pledg_gateway_3>
+            <pledg_gateway_4>
+                <model>aims_pledg/method_gateway4</model>
+                <active>0</active>
+                <title>Pledg</title>
+                <description>Payer en plusieurs fois</description>
+                <seuil>0</seuil>
+                <order_status>pending</order_status>
+            </pledg_gateway_4>
+            <pledg_gateway_5>
+                <model>aims_pledg/method_gateway5</model>
+                <active>0</active>
+                <title>Pledg</title>
+                <description>Payer en plusieurs fois</description>
+                <seuil>0</seuil>
+                <order_status>pending</order_status>
+            </pledg_gateway_5>
+            <pledg_gateway_6>
+                <model>aims_pledg/method_gateway6</model>
+                <active>0</active>
+                <title>Pledg</title>
+                <description>Payer en plusieurs fois</description>
+                <seuil>0</seuil>
+                <order_status>pending</order_status>
+            </pledg_gateway_6>
+            <pledg_gateway_7>
+                <model>aims_pledg/method_gateway7</model>
+                <active>0</active>
+                <title>Pledg</title>
+                <description>Payer en plusieurs fois</description>
+                <seuil>0</seuil>
+                <order_status>pending</order_status>
+            </pledg_gateway_7>
+            <pledg_gateway_8>
+                <model>aims_pledg/method_gateway8</model>
+                <active>0</active>
+                <title>Pledg</title>
+                <description>Payer en plusieurs fois</description>
+                <seuil>0</seuil>
+                <order_status>pending</order_status>
+            </pledg_gateway_8>
+        </payment>
+    </default>
+</config>
