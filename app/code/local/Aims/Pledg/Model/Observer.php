@@ -9,58 +9,6 @@
 
 class Aims_Pledg_Model_Observer
 {
-    /**
-     * Check if we must to show Pledg payment method
-     * @param Varien_Event_Observer $observer
-     */
-    public function paymentMethodAvailable(Varien_Event_Observer $observer)
-    {
-        $mainPlegeCode = "pledg_gateway";
-        $pledgCodes = [
-            'pledg_gateway_1',
-            'pledg_gateway_2',
-            'pledg_gateway_3',
-            'pledg_gateway_4',
-            'pledg_gateway_5',
-            'pledg_gateway_6',
-            'pledg_gateway_7',
-            'pledg_gateway_8'
-        ];
-
-        $cart = Mage::getSingleton('checkout/cart');
-        $grandTotal = $cart->getQuote()->getGrandTotal();
-
-        if($observer->getEvent()->getMethodInstance()->getCode() == $mainPlegeCode) {
-            $checkResult = $observer->getEvent()->getResult();
-            if(Mage::helper('aims_pledg/config')->getPledgIsActive()) {
-                $allPaymentMethods = Mage::getModel('payment/config')->getAllMethods();
-                foreach ($allPaymentMethods as $paymentMethod) {
-                    if(in_array($paymentMethod->getCode(), $pledgCodes) &&
-                        $paymentMethod->isActive() &&
-                        (!$paymentMethod->getSeuil()|| $grandTotal >= $paymentMethod->getSeuil()))
-                    {
-                        $checkResult->isAvailable = true;
-                        return;
-                    }
-                }
-            }
-
-            $checkResult->isAvailable = false;
-            return;
-        }
-
-        $code = $observer->getEvent()->getMethodInstance()->getCode();
-        if(in_array($code, $pledgCodes)){
-
-            $checkResult = $observer->getEvent()->getResult();
-            if(Mage::registry('pledg_gateway_available') == $code) {
-                $checkResult->isAvailable = true;
-            } else {
-                $checkResult->isAvailable = false;
-            }
-        }
-    }
-
     public function setPledgPaymentMethod(Varien_Event_Observer $observer)
     {
         $controller = $observer->getControllerAction();
@@ -85,5 +33,77 @@ class Aims_Pledg_Model_Observer
             Mage::register('pledg_gateway_available', $payment['pledg_method']);
         }
 
+    }
+
+    /**
+     * @param Varien_Event_Observer $observer
+     */
+    public function saveConfigPledg(Varien_Event_Observer $observer)
+    {
+        $groups = Mage::app()->getRequest()->getPost('groups');
+        if (!$groups) {
+            return;
+        }
+        foreach ($groups as $section => $values) {
+            if (strstr($section, 'pledg_gateway_') === false) {
+                continue;
+            }
+            $paymentId = str_replace('pledg_gateway_', '', $section);
+
+            $fields = $values['fields'];
+            if (!array_key_exists('active', $fields) || !array_key_exists('api_key_mapping', $fields)) {
+                continue;
+            }
+            if (!$fields['active']['value']) {
+                continue;
+            }
+            $mappings = trim($fields['api_key_mapping']['value']);
+            $mappings = preg_split("/\r\n|\n|\r/", $mappings);
+            $countries = array();
+            foreach ($mappings as $key => $mapping) {
+                $mapping = trim($mapping);
+                if (empty($mapping)) {
+                    continue;
+                }
+                $mapping = explode(':', $mapping);
+                if (count($mapping) !== 2) {
+                    $groups[$section]['fields']['active']['value'] = 0;
+                    $this->addAdminError('Line %1 is not formatted correctly for pledg payment method %2.', array('%1', '%2'), array($key + 1, $paymentId));
+                    continue;
+                }
+                $country = $mapping[0];
+                if (strlen($country) !== 2) {
+                    $groups[$section]['fields']['active']['value'] = 0;
+                    $this->addAdminError('Country on line %1 is not formatted correctly for pledg payment method %2.', array('%1', '%2'), array($key + 1, $paymentId));
+                    continue;
+                }
+                if (in_array($country, $countries)) {
+                    $groups[$section]['fields']['active']['value'] = 0;
+                    $this->addAdminError('Please remove duplicate mapping for country %1 on pledg payment method %2.', array('%1', '%2'), array($country, $paymentId));
+                    continue;
+                }
+                $countries[] = $country;
+            }
+            if (count($countries) === 0) {
+                $groups[$section]['fields']['active']['value'] = 0;
+                $this->addAdminError('You must select at least one country to be able to activate pledg payment method %1.', array('%1'), array($paymentId));
+                continue;
+            }
+            $groups[$section]['fields']['allowspecific']['value'] = 1;
+            $groups[$section]['fields']['specificcountry']['value'] = implode(',', $countries);
+        }
+
+        Mage::app()->getRequest()->setPost('groups', $groups);
+    }
+
+    /**
+     * @param string $message
+     * @param array  $placeholders
+     * @param array  $replacements
+     */
+    private function addAdminError($message, $placeholders = array(), $replacements = array())
+    {
+        Mage::getSingleton('adminhtml/session')
+            ->addError(str_replace($placeholders, $replacements, Mage::helper('aims_pledg')->__($message)));
     }
 }

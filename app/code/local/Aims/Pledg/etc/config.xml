@@ -30,17 +30,6 @@
                 <class>Aims_Pledg_Model</class>
             </aims_pledg>
         </models>
-        <events>
-            <payment_method_is_active>
-                <observers>
-                    <aims_pledg_payment_method_is_active>
-                        <type>singleton</type>
-                        <class>Aims_Pledg_Model_Observer</class>
-                        <method>paymentMethodAvailable</method>
-                    </aims_pledg_payment_method_is_active>
-                </observers>
-            </payment_method_is_active>
-        </events>
     </global>
     <frontend>
         <routers>
@@ -80,22 +69,32 @@
             </controller_action_predispatch>
         </events>
     </frontend>
+    <adminhtml>
+        <events>
+            <controller_action_predispatch_adminhtml_system_config_save>
+                <observers>
+                    <aims_pledg_saveadmin>
+                        <type>singleton</type>
+                        <class>Aims_Pledg_Model_Observer</class>
+                        <method>saveConfigPledg</method>
+                    </aims_pledg_saveadmin>
+                </observers>
+            </controller_action_predispatch_adminhtml_system_config_save>
+        </events>
+    </adminhtml>
     <default>
-        <payment>
-            <pledg_gateway>
-                <model>aims_pledg/method_gateway</model>
+        <pledg_gateway>
+            <payment>
                 <staging>1</staging>
-                <active>0</active>
-                <title>Pledg</title>
-                <gateway_logo>aims_pledg/pledg_logo.png</gateway_logo>
                 <debug>0</debug>
-            </pledg_gateway>
+            </payment>
+        </pledg_gateway>
+        <payment>
             <pledg_gateway_1>
                 <model>aims_pledg/method_gateway1</model>
                 <active>0</active>
                 <title>Pledg</title>
                 <description>Payer en plusieurs fois</description>
-                <seuil>0</seuil>
                 <order_status>pending</order_status>
             </pledg_gateway_1>
             <pledg_gateway_2>
@@ -103,7 +102,6 @@
                 <active>0</active>
                 <title>Pledg</title>
                 <description>Payer en plusieurs fois</description>
-                <seuil>0</seuil>
                 <order_status>pending</order_status>
             </pledg_gateway_2>
             <pledg_gateway_3>
@@ -111,7 +109,6 @@
                 <active>0</active>
                 <title>Pledg</title>
                 <description>Payer en plusieurs fois</description>
-                <seuil>0</seuil>
                 <order_status>pending</order_status>
             </pledg_gateway_3>
             <pledg_gateway_4>
@@ -119,7 +116,6 @@
                 <active>0</active>
                 <title>Pledg</title>
                 <description>Payer en plusieurs fois</description>
-                <seuil>0</seuil>
                 <order_status>pending</order_status>
             </pledg_gateway_4>
             <pledg_gateway_5>
@@ -127,7 +123,6 @@
                 <active>0</active>
                 <title>Pledg</title>
                 <description>Payer en plusieurs fois</description>
-                <seuil>0</seuil>
                 <order_status>pending</order_status>
             </pledg_gateway_5>
             <pledg_gateway_6>
@@ -135,7 +130,6 @@
                 <active>0</active>
                 <title>Pledg</title>
                 <description>Payer en plusieurs fois</description>
-                <seuil>0</seuil>
                 <order_status>pending</order_status>
             </pledg_gateway_6>
             <pledg_gateway_7>
@@ -143,7 +137,6 @@
                 <active>0</active>
                 <title>Pledg</title>
                 <description>Payer en plusieurs fois</description>
-                <seuil>0</seuil>
                 <order_status>pending</order_status>
             </pledg_gateway_7>
             <pledg_gateway_8>
@@ -151,7 +144,6 @@
                 <active>0</active>
                 <title>Pledg</title>
                 <description>Payer en plusieurs fois</description>
-                <seuil>0</seuil>
                 <order_status>pending</order_status>
             </pledg_gateway_8>
         </payment>

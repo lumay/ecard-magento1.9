@@ -10,14 +10,4 @@
 class Aims_Pledg_Model_Method_Gateway3 extends Aims_Pledg_Model_Method_Gateway
 {
     protected $_code = "pledg_gateway_3";
-    protected $_formBlockType = 'aims_pledg/form_gateway3';
-
-    /**
-     * Retrieve Payment Method Code
-     * @return string
-     */
-    public function getCode()
-    {
-        return $this->_code;
-    }
 }

@@ -12,48 +12,53 @@
  */
 class Aims_Pledg_Block_Form_Gateway extends Mage_Payment_Block_Form
 {
-    protected $_model = 'gateway';
+    protected $_template = 'aims_pledg/checkout/method.phtml';
 
-    protected function _construct()
+    /**
+     * Payment method additional label part getter
+     * Add cards logos
+     *
+     * @return string
+     */
+    public function getMethodLabelAfterHtml()
     {
-        parent::_construct();
+        $logoURL = $this->_checkAndGetSkinUrl($this->getMethod()->getConfigData('gateway_logo'));
 
-        $this->setTemplate('aims_pledg/checkout/method.phtml');
-
-        $logoURL = $this->_checkAndGetSkinUrl($this->_getModel()->getLogo());
-
-        if (!$this->_getHelper()->isAdmin() && $logoURL) {
+        if ($logoURL !== false) {
             $logo = Mage::getConfig()->getBlockClassName('core/template');
             $logo = new $logo;
-            $logo->setTemplate('aims_pledg/logo.phtml');
+            $logo->setTemplate('aims_pledg/checkout/logo.phtml');
             $logo->setLogoSrc($logoURL);
-            $logo->setMethodTitle($this->_getModel()->getTitle());
+            $logo->setMethodTitle($this->getMethod()->getConfigData('title'));
 
-            // Add logo to the method title.
-            $this->setMethodLabelAfterHtml($logo->toHtml());
+            return $logo->toHtml();
         }
+
+        return '';
     }
 
+    /**
+     * @param string $fileName
+     *
+     * @return false|string
+     */
     protected function _checkAndGetSkinUrl($fileName)
     {
         if (!$fileName) {
-            $fileName = "pledg_logo.png";
+            $fileName = "default/pledg_logo.png";
         }
 
         $filePath = Mage::getBaseDir('media') . DS . 'aims_pledg' . DS . $fileName;
-        if (! $this->_getHelper()->fileExists($filePath)) {
-            Mage::log("Donot exists");
+        $io = new Varien_Io_File();
+        if (!$io->fileExists($filePath)) {
+            Mage::log(sprintf("Pledg logo %s does not exist", $filePath));
+
             return false;
         }
 
         $logoUrl = Mage::getBaseUrl('media') . 'aims_pledg/' . $fileName;
 
         return $logoUrl;
-    }
-
-    protected function _getModel()
-    {
-        return Mage::getModel('aims_pledg/method_' . $this->_model);
     }
 
     /**
@@ -64,40 +69,5 @@ class Aims_Pledg_Block_Form_Gateway extends Mage_Payment_Block_Form
     protected function _getHelper()
     {
         return Mage::helper('aims_pledg');
-    }
-
-    public function getAvailableMethods()
-    {
-        $pledgCodes = [
-            'pledg_gateway_1',
-            'pledg_gateway_2',
-            'pledg_gateway_3',
-            'pledg_gateway_4',
-            'pledg_gateway_5',
-            'pledg_gateway_6',
-            'pledg_gateway_7',
-            'pledg_gateway_8'
-        ];
-
-        $availableMethods = array();
-        $grandTotal = $this->getQuote()->getGrandTotal();
-
-        $allPaymentMethods = Mage::getModel('payment/config')->getAllMethods();
-        foreach ($allPaymentMethods as $paymentMethod) {
-            if(in_array($paymentMethod->getCode(), $pledgCodes) &&
-                $paymentMethod->isActive() &&
-                (!$paymentMethod->getSeuil() || $grandTotal >= $paymentMethod->getSeuil()))
-            {
-                $availableMethods[] = $paymentMethod;
-            }
-        }
-
-        return $availableMethods;
-    }
-
-    protected function getQuote()
-    {
-        $cart = Mage::getSingleton('checkout/cart');
-        return $cart->getQuote();
     }
 }
