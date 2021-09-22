@@ -27,4 +27,36 @@ class Aims_Pledg_Helper_Data extends Mage_Core_Helper_Abstract
     {
         return $order->getPayment()->getMethodInstance();
     }
+
+    /**
+     * @param Mage_Sales_Model_Order $order
+     *
+     * @return string|null
+     */
+    public function getMerchantIdForOrder($order)
+    {
+        $paymentMethod = $order->getPayment()->getMethodInstance();
+        if (!$paymentMethod->getConfigData('active')) {
+            return null;
+        }
+
+        $mappings = $paymentMethod->getConfigData('api_key_mapping');
+        $mappings = preg_split("/\r\n|\n|\r/", trim($mappings));
+
+        foreach ($mappings as $mapping) {
+            $mapping = trim($mapping);
+            if (empty($mapping)) {
+                continue;
+            }
+            $mapping = explode(':', $mapping);
+            if (count($mapping) !== 2) {
+                continue;
+            }
+            if ($mapping[0] === $order->getBillingAddress()->getCountryId()) {
+                return $mapping[1];
+            }
+        }
+
+        return null;
+    }
 }

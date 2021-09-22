@@ -28,35 +28,35 @@ class Aims_Pledg_Helper_Checkout extends Mage_Core_Helper_Abstract
      * Cancel last placed order with specified comment message
      *
      * @param string $comment Comment appended to order history
-     * @throws Mage_Core_Exception
-     * @return bool True if order cancelled, false otherwise
+     * @param Mage_Sales_Model_Order $order
+     *
+     * @throws \Exception
      */
-    public function cancelCurrentOrder($comment, $order = null)
+    public function cancelCurrentOrder($comment, $order)
     {
-        if(is_null($order)) {
-            $order = $this->_session->getLastRealOrder();
-        }
+        $allowedCancelationStates = array(
+            Mage_Sales_Model_Order::STATE_NEW,
+            Mage_Sales_Model_Order::STATE_PENDING_PAYMENT
+        );
+        $canceledState = Mage_Sales_Model_Order::STATE_CANCELED;
+        if ($order->getState() != $canceledState) {
+            if (!$order->canCancel() || !in_array($order->getState(), $allowedCancelationStates)) {
+                throw new \Exception('Order cannot be canceled');
+            }
 
-        if ($order->getId() && $order->getState() != Mage_Sales_Model_Order::STATE_CANCELED) {
             $order->registerCancellation($comment)->save();
-            return true;
         }
-        return false;
     }
 
     /**
      * Restores quote (restores cart)
-     *
-     * @return bool
      */
-    public function restoreQuote($order = null)
+    public function restoreQuote()
     {
-        if(is_null($order)) {
-            $order = $this->_session->getLastRealOrder();
-        }
+        $lastQuoteId = $this->_session->getLastSuccessQuoteId();
 
-        if ($order->getId()) {
-            $quote = $this->_getQuote($order->getQuoteId());
+        if ($lastQuoteId) {
+            $quote = $this->_getQuote($lastQuoteId);
             if ($quote->getId()) {
                 $quote->setIsActive(1)
                     ->setReservedOrderId(null)
@@ -64,10 +64,8 @@ class Aims_Pledg_Helper_Checkout extends Mage_Core_Helper_Abstract
                 $this->_session
                     ->replaceQuote($quote)
                     ->unsLastRealOrderId();
-                return true;
             }
         }
-        return false;
     }
 
     /**

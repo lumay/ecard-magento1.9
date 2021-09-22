@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <layout version="0.1.0">
     <aims_pledg_checkout_form>
-        <update handle="page_empty" />
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
         <reference name="head">
             <action method="addCss">
                 <stylesheet>css/aims/pledg.css</stylesheet>
