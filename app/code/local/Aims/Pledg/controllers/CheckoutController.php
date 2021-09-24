@@ -9,6 +9,9 @@
 
 class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
 {
+    const MODE_TRANSFER = 'transfer';
+    const MODE_BACK = 'back';
+
     const STATUS_PENDING = array(
         "waiting",
         "pending",
@@ -22,7 +25,7 @@ class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
         "reversed"
     );
 
-    const STATUS_CANCELED = array(
+    const STATUS_CANCELLED = array(
         "failed",
         "voided",
         "refunded",
@@ -100,253 +103,273 @@ class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
         return $this->_redirect('checkout/cart');
     }
 
+    /**
+     * @param mixed $message
+     * @param bool  $forceLog
+     */
+    private function log($message, $forceLog = false)
+    {
+        if (Mage::helper('aims_pledg/config')->getPledgIsInDebugMode() || $forceLog) {
+            Mage::log($message, null, "pledg.log", true);
+        }
+    }
+
+    /**
+     * @param array  $array
+     * @param string $key
+     * @param string $defaultValue
+     *
+     * @return mixed
+     */
+    private function getValueFromArray($array, $key, $defaultValue = '')
+    {
+        $value = $defaultValue;
+        if (array_key_exists($key, $array) && $array[$key] !== null) {
+            $value = $array[$key];
+        }
+
+        return $value;
+    }
+
     public function notificationsAction()
     {
-        /** THIS IS WHAT WE SHOULD RECEIVE WITH BACK MODE */
-        /*$params = array(
-            "created_at" => "2019-04-04T12:20:34.97138Z",
-             "id" => "test-valid",
-             "additional_data" => array("xx" => "yy"),
-             "metadata" =>  array("foo" => "bar"),
-             "status" => "completed",
-             "sandbox" => "true",
-             "error" => "",
-             "reference" => "PLEDG_1086986786391",
-             "signature" => "B1C777835C01CA96AC4C3097FD46A7CA49B92BE157EDE0CB3552880D12A15359"
-        );*/
-        /** THIS IS WHAT WE SHOULD RECEIVE WITH TRANSFER MODE */
-        /*$params = array(
-            "signature" => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWZlcmVuY2UiOiJwdXJjaGFzZV9yZWZlcmVuY2UiLCJjcmVhdGVkIjoiMjAyMC0wOS0xNyAxNTowMDowMi4wNTIxNzciLCJ0cmFuc2Zlcl9vcmRlcl9pdGVtX3VpZCI6InRyaV9mYXNka2ZpYXNmc2QyMzRuZnM3ZjVkIiwiYW1vdW50X2NlbnRzIjoxMDAwMH0.6ZhlvdcPgjwwBfxCrRpzaBGoRxTCoqtWJzFhB8pw4Ys"
-        );*/
-        /** THIS IS WHAT THE PREVIOUS SIGNATURE SHOULD LOOK AFTER DECRYPT */
-        /*$paramsDecoded = array(
-            "reference" => "purchase_reference",
-            "created_at" => "2019-04-04T12:20:34.97138Z",
-            "transfer_order_item_uid" => "test-valid",
-            "amount_cents" => 10000,
-        );*/
+        $success = true;
+        $responseCode = 200;
+        $message = '';
 
-        $params = json_decode($this->getRequest()->getRawBody(), true);
+        try {
+            $params = json_decode($this->getRequest()->getRawBody(), true);
 
-        if(Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-            Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
-            Mage::log($params, null , "pledg.log", true);
-        }
-
-        if(!is_array($params) || empty($params['signature'])) {
-            if(Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-                Mage::log(__METHOD__ . " " . __LINE__, null, "pledg.log", true);
-                Mage::log("Error : no signature param", null, "pledg.log", true);
-            }
-            return;
-        }
-
-        $signatureParam = $params['signature'];
-
-        if(count($params) == 1) {
-            // Transfer Mode
-            $mode = "transfer";
-            $params = Mage::helper('aims_pledg/crypto')->readSignature($signatureParam);
-
-            if(Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-                Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
-                Mage::log($params, null , "pledg.log", true);
-            }
-
-            $transactionId = $params['transfer_order_item_uid'];
-        } else {
-            // Back Mode
-            $mode = "back";
-            $transactionId = $params['id'];
-        }
-
-        $incrementId = Mage::helper('aims_pledg')->getIncrementIdByReference($params['reference']);
-        $order = Mage::getModel('sales/order')->loadByIncrementId($incrementId);
-
-        if(!$order) {
-            if(Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-                Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
-                Mage::log("Order " . $incrementId . " can't be found.", null , "pledg.log", true);
-            }
-            return;
-        }
-
-        $verify = false;
-        if($mode == "transfer") {
-            try {
-                Mage::helper('aims_pledg/crypto')->decryptSignature($signatureParam, $this->_getSecretKey($order));
-                $verify = true;
-            } catch (Exception $e) {
-                if(Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-                    Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
-                    Mage::log("Order " . $incrementId . " decrypt failed : " . $e->getMessage(), null , "pledg.log", true);
-                }
-            }
-        } elseif($mode == "back") {
-            $signatureArray = array(
-                "created_at" => $params['created_at'],
-                "error" => $params['error'],
-                "id" => $params['id'],
-                "reference" => $params['reference'],
-                "sandbox" => $params['sandbox'],
-                "status" => $params['status']
+            $secretKey = Mage::getStoreConfig(
+                sprintf('payment/%s/secret_key', $this->getRequest()->getParam('pledg_method')),
+                (int)$this->getRequest()->getParam('ipn_store_id')
             );
-
-            $signatureToCheck = $this->_generateSignature($signatureArray, $this->_getSecretKey($order));
-
-            if($signatureToCheck == $signatureParam) {
-                $verify = true;
-            }
-        }
-
-        if($verify == false) {
-            if(Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-                Mage::log(__METHOD__ . " " . __LINE__, null, "pledg.log", true);
-                Mage::log("Signature is not correct. Cancel Order " . $incrementId, null, "pledg.log", true);
-            }
-            $this->getCheckoutHelper()->cancelCurrentOrder("Pledg Notification: ".($incrementId)." has been canceled. Error : Signature is not correct", $order);
-            return;
-        }
-
-        // Check order status
-        if ($order->getState() !== Mage_Sales_Model_Order::STATE_NEW) {
-            if(Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-                Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
-                Mage::log("Order " . $incrementId . " is not in New State. Nothing to do.", null , "pledg.log", true);
+            if ($secretKey === null) {
+                $secretKey = '';
             }
 
-            $order->addStatusHistoryComment("Pledg Notification: ".($incrementId)." is not in New State. Nothing to do.")
-                ->setIsCustomerNotified(false);
-            return;
-        }
+            $this->log('Received IPN');
+            $this->log($params);
 
-        $this->setOrder($order);
+            if (isset($params['signature'])) {
+                if (count($params) === 1) {
+                    $this->log('Mode signed transfer');
 
-        if($mode == "back") {
-            if (in_array($params['status'], self::STATUS_COMPLETED)) {
-                if (Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-                    Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
-                    Mage::log("Order " . $incrementId . " : Pledg returned " . $params['status'] . " status. Invoice Order.", null, "pledg.log", true);
+                    $signature = $params['signature'];
+                    $params = Mage::helper('aims_pledg/crypto')->decryptSignature($signature, $secretKey);
+                    $this->log('Decrypted message');
+                    $this->log($params);
+
+                    $this->handleTransferMode($params);
+                } else {
+                    $this->log('Mode signed back');
+
+                    if ($params['signature'] !== $this->generateSignature($params, $secretKey)) {
+                        throw new \Exception('Invalid signature');
+                    }
+
+                    $this->handleBackMode($params);
                 }
-
-                $this->_invoiceOrder($order, $transactionId);
-
-                $order->addStatusHistoryComment("Pledg Notification: " . $incrementId . " status received is : " . $params['status'] . ". Invoice Order.")
-                    ->setIsCustomerNotified(false);
-                return;
-            } elseif (in_array($params['status'], self::STATUS_CANCELED)) {
-                if (Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-                    Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
-                    Mage::log("Order " . $incrementId . " : Pledg returned " . $params['status'] . " status. Cancel Order.", null, "pledg.log", true);
-                }
-
-                $this->getCheckoutHelper()->cancelCurrentOrder("Pledg Notification: " . $incrementId ." status received is : " . $params['status']  . "Cancel Order.", $order);
-                return;
-            } elseif (in_array($params['status'], self::STATUS_PENDING)) {
-                /** NOTHING TO DO */
-                if (Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-                    Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
-                    Mage::log("Order " . $incrementId . " : Pledg returned " . $params['status'] . " status. Nothing to do.", null, "pledg.log", true);
-                }
-
-                $order->addStatusHistoryComment("Pledg Notification: " . ($incrementId) . " status received is : " . $params['status'] . ". Nothing to do.")
-                    ->setIsCustomerNotified(false);
-                return;
+            } else {
+                $this->log('Mode unsigned transfer');
+                $this->handleTransferMode($params);
             }
-        } elseif($mode == "transfer") {
-            if (Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-                Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
-                Mage::log("Order " . $incrementId . " : Transfer mode always return completed. Invoice Order.", null, "pledg.log", true);
-            }
+        } catch (\Exception $e) {
+            $this->log('An error occurred while processing IPN : ' . $e->getMessage(), true);
 
-            $this->_invoiceOrder($order, $transactionId);
-
-            $order->addStatusHistoryComment("Pledg Notification: " . ($incrementId) . " Transfer mode always return completed. Invoice Order.")
-                ->setIsCustomerNotified(false);
-            return;
+            $success = false;
+            $responseCode = 500;
+            $message = $e->getMessage();
         }
+
+        $responseContent = array('success' => $success, 'message' => $message);
+        $this->getResponse()->setHttpResponseCode($responseCode);
+        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($responseContent));
+
+        $this->log('IPN response [' . $responseCode . ']');
+        $this->log($responseContent);
     }
 
     /**
-     * @param string|string $message
-     */
-    protected function errorOrder($message) {
-        $this
-            ->getCheckoutHelper()
-            ->cancelCurrentOrder(
-                "Order #".($this->getOrder()->getIncrementId())." " . $message,
-                $this->getOrder()
-            );
-        $this->getCheckoutHelper()->restoreQuote($this->getOrder()); //restore cart
-        $this->getCheckoutSession()->addError($this->__($message));
-        return $this->_redirect('checkout/cart', array('_secure'=> false));
-    }
-
-    /**
-     * Generate Invoice
+     * @param Mage_Sales_Model_Order $order
+     * @param string $transactionId
+     * @param string $ipnMessage
      *
-     * @param $order
-     * @param $transactionId
+     * @throws \Exception
      */
-    protected function _invoiceOrder($order, $transactionId)
+    private function invoiceOrder($order, $transactionId, $ipnMessage)
     {
-        $orderState = Mage_Sales_Model_Order::STATE_PROCESSING;
-        $orderStatus = $order->getConfig()->getStateDefaultStatus($orderState);
-
-        $order->setState($orderState)
-            ->setStatus($orderStatus)
-            ->addStatusHistoryComment("Pledg authorisation success. Transaction #$transactionId")
-            ->setIsCustomerNotified(false);
-
-        $payment = $order->getPayment();
-        $payment->setTransactionId($transactionId);
-        $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE, null, true);
-        $order->save();
-
-        if(!$order->canInvoice()){
-            throw new Mage_Core_Exception($this->__('Cannot create an invoice.'));
+        if (!$order->canInvoice() || $order->getState() !== Mage_Sales_Model_Order::STATE_PENDING_PAYMENT) {
+            throw new \Exception(sprintf('Order with state %s cannot be processed and invoiced', $order->getState()));
         }
 
+        $comment = $this->__('Registered update about approved payment.') . ' ' . str_replace('%1', $transactionId, $this->__('Transaction ID: "%1"'));
+        $state = Mage_Sales_Model_Order::STATE_PROCESSING;
+        $transactionSave = Mage::getModel('core/resource_transaction');
         $invoice = Mage::getModel('sales/service_order', $order)->prepareInvoice();
-
         if (!$invoice->getTotalQty()) {
-            throw new Mage_Core_Exception($this->__("You can't create an invoice without products."));
+            Mage::throwException(
+                $this->__('Cannot create an invoice without products.')
+            );
         }
-
-        $invoice->setTransactionId($transactionId);
-        $invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+        $invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::CAPTURE_ONLINE);
         $invoice->register();
+        $invoice->setTransactionId($transactionId);
+        $transactionSave->addObject($invoice);
 
-        $transaction = Mage::getModel('core/resource_transaction')
-            ->addObject($invoice)
-            ->addObject($invoice->getOrder());
-        $transaction->save();
+        $order->setState($state, $order->getConfig()->getStateDefaultStatus($state), $comment);
+        $transactionSave->addObject($order);
+        $transactionSave->save();
 
-        if (!$order->getEmailSent()) {
-            $order->sendNewOrderEmail();
+        $order->sendNewOrderEmail();
+
+        $this->addMessageOnOrder($order, $ipnMessage);
+    }
+
+    /**
+     * @param array $params
+     *
+     * @throws \Exception
+     */
+    private function handleBackMode(array $params)
+    {
+        $order = $this->getIpnOrder($params);
+
+        $pledgStatus = $this->getValueFromArray($params, 'status');
+        $transactionId = $this->getValueFromArray($params, 'id');
+        $this->log('Payment status received with back mode : ' . $pledgStatus);
+
+        $this->addPaymentInformation($order, $transactionId, self::MODE_BACK, $pledgStatus);
+
+        if (in_array($pledgStatus, self::STATUS_COMPLETED)) {
+            $this->log('Invoice order after receiving back notification');
+            $this->invoiceOrder($order, $transactionId, str_replace(
+                '%1',
+                $pledgStatus,
+                $this->__('Received invoicing order from Pledg back notification with status %1')
+            ));
+
+            return;
         }
-    }
 
-    protected function _getSecretKey($order) {
-        return Mage::helper('aims_pledg')->getGatewayConfig($order)->getSecretKey();
-    }
-
-    protected function _generateSignature($data, $secret) {
-        $dataString = "";
-        $arraySize = count($data);
-        $count = 0;
-        foreach($data as $key=>$value) {
-            $count++;
-
-            $dataString .= $key ."=". $value;
-            if($count >= $arraySize) {
-                continue;
+        if (in_array($pledgStatus, self::STATUS_CANCELLED)) {
+            $this->log('Cancel order after receiving back notification');
+            if (!$order->canCancel()) {
+                throw new \Exception(sprintf('Order %s cannot be canceled', $order->getIncrementId()));
             }
-            $dataString .= $secret;
+            $order->registerCancellation(str_replace(
+                '%1',
+                $pledgStatus,
+                $this->__('Received cancellation order from Pledg back notification with status %1')
+            ))->save();
+
+            return;
         }
 
-        $signature = strtoupper(hash('sha256', $dataString));
+        if (in_array($pledgStatus, self::STATUS_PENDING)) {
+            $this->log('Received back notification with Pending status. Do nothing');
+            $this->addMessageOnOrder($order, str_replace(
+                '%1',
+                $pledgStatus,
+                'Received Pledg back notification with status %1. Waiting for further instructions to update order.'
+            ));
 
-        return $signature;
+            return;
+        }
+
+        $this->log('Received unhandled status from Pledg back notification : ' . $pledgStatus, true);
+    }
+
+    /**
+     * @param array $params
+     *
+     * @throws \Exception
+     */
+    private function handleTransferMode(array $params)
+    {
+        $order = $this->getIpnOrder($params);
+
+        // In transfer mode, notification is only sent when payment is validated
+        $transactionId = $this->getValueFromArray($params, 'purchase_uid');
+        $this->log('Invoice order after receiving transfer notification');
+
+        $this->addPaymentInformation($order, $transactionId, self::MODE_TRANSFER, 'completed');
+        $this->invoiceOrder($order, $transactionId, $this->__('Received invoicing order from Pledg transfer notification'));
+    }
+
+    /**
+     * @param Mage_Sales_Model_Order $order
+     * @param string $transactionId
+     * @param string $mode
+     * @param string $pledgStatus
+     */
+    private function addPaymentInformation($order, $transactionId, $mode, $pledgStatus)
+    {
+        $orderPayment = $order->getPayment();
+        $orderPayment->setAdditionalInformation('transaction_id', $transactionId);
+        $orderPayment->setAdditionalInformation('pledg_mode', $mode);
+        $orderPayment->setAdditionalInformation('pledg_status', $pledgStatus);
+        $orderPayment->save();
+    }
+
+    /**
+     * @param Mage_Sales_Model_Order  $order
+     * @param string $message
+     *
+     * @throws \Exception
+     */
+    private function addMessageOnOrder($order, $message)
+    {
+        $order->addStatusHistoryComment($message);
+        $order->save();
+    }
+
+    /**
+     * @param array $params
+     *
+     * @return Mage_Sales_Model_Order
+     *
+     * @throws \Exception
+     */
+    private function getIpnOrder($params)
+    {
+        $orderIncrementId = Mage::helper('aims_pledg')->getIncrementIdByReference($params['reference']);
+        $order = $this->getOrderById($orderIncrementId);
+
+        if ($order === null) {
+            throw new \Exception(sprintf('Could not retrieve order with id %s', $orderIncrementId));
+        }
+
+        $paymentMethod = $order->getPayment()->getMethodInstance();
+        if (strstr($paymentMethod->getCode(), 'pledg_gateway_') === false) {
+            throw new \Exception(sprintf('Order with method %s should not be updated via Pledg notification', $paymentMethod->getCode()));
+        }
+
+        return $order;
+    }
+
+    /**
+     * @param array  $params
+     * @param string $secret
+     *
+     * @return string
+     */
+    private function generateSignature($params, $secret)
+    {
+        $paramsToValidate = array(
+            'created_at',
+            'error',
+            'id',
+            'reference',
+            'sandbox',
+            'status',
+        );
+
+        $stringToValidate = array();
+        foreach ($paramsToValidate as $param) {
+            $stringToValidate[] = $param . '=' . $this->getValueFromArray($params, $param);
+        }
+
+        return strtoupper(hash('sha256', implode($secret, $stringToValidate)));
     }
 }

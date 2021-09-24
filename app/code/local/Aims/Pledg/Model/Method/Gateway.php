@@ -19,6 +19,26 @@ abstract class Aims_Pledg_Model_Method_Gateway extends Mage_Payment_Model_Method
     protected $_canUseCheckout         = true;
 
     /**
+     * @inheritDoc
+     */
+    public function initialize($paymentAction, $stateObject)
+    {
+        $payment = $this->getInfoInstance();
+        $order = $payment->getOrder();
+        $order->setCanSendNewEmailFlag(false);
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getConfigPaymentAction()
+    {
+        return Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE_CAPTURE;
+    }
+
+    /**
      * @return mixed
      */
     public function getOrderPlaceRedirectUrl()
