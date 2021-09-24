@@ -36,11 +36,6 @@ class Aims_Pledg_Helper_Data extends Mage_Core_Helper_Abstract
         return str_replace(self::ORDER_REFERENCE_PREFIX, '', $reference);
     }
 
-    public function getGatewayConfig($order)
-    {
-        return $order->getPayment()->getMethodInstance();
-    }
-
     /**
      * @param Mage_Sales_Model_Order $order
      *
@@ -71,5 +66,16 @@ class Aims_Pledg_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         return null;
+    }
+
+    /**
+     * @param mixed $message
+     * @param bool  $forceLog
+     */
+    public function log($message, $forceLog = false)
+    {
+        if (Mage::helper('aims_pledg/config')->getPledgIsInDebugMode() || $forceLog) {
+            Mage::log($message, null, "pledg.log", true);
+        }
     }
 }

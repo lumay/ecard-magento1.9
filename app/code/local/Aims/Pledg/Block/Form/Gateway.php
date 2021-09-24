@@ -51,7 +51,7 @@ class Aims_Pledg_Block_Form_Gateway extends Mage_Payment_Block_Form
         $filePath = Mage::getBaseDir('media') . DS . 'aims_pledg' . DS . $fileName;
         $io = new Varien_Io_File();
         if (!$io->fileExists($filePath)) {
-            Mage::log(sprintf("Pledg logo %s does not exist", $filePath));
+            Mage::helper('aims_pledg')->log(sprintf("Pledg logo %s does not exist", $filePath), true);
 
             return false;
         }
@@ -59,15 +59,5 @@ class Aims_Pledg_Block_Form_Gateway extends Mage_Payment_Block_Form
         $logoUrl = Mage::getBaseUrl('media') . 'aims_pledg/' . $fileName;
 
         return $logoUrl;
-    }
-
-    /**
-     * Return Pledg data helper.
-     *
-     * @return Aims_Pledg_Helper_Data
-     */
-    protected function _getHelper()
-    {
-        return Mage::helper('aims_pledg');
     }
 }

@@ -9,17 +9,23 @@
 
 class Aims_Pledg_Block_Checkout_Form extends Mage_Core_Block_Template
 {
-    protected $_order;
+    /**
+     * @var Mage_Sales_Model_Order
+     */
+    private $order;
 
+    /**
+     * @return Mage_Sales_Model_Order
+     */
     public function getOrder()
     {
-        if (!$this->_order) {
+        if (!$this->order) {
             $order = Mage::registry('pledg_order');
 
-            $this->_order = $order;
+            $this->order = $order;
         }
 
-        return $this->_order;
+        return $this->order;
     }
 
     /**
@@ -62,10 +68,7 @@ class Aims_Pledg_Block_Checkout_Form extends Mage_Core_Block_Template
             $pledgData['phoneNumber'] = preg_replace('/^(\+|00)(.*)$/', '$2', $telephone);
         }
 
-        if (Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-            Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
-            Mage::log($pledgData, null , "pledg.log", true);
-        }
+        Mage::helper('aims_pledg')->log($pledgData);
 
         $secretKey = $order->getPayment()->getMethodInstance()->getConfigData('secret_key', $order->getStoreId());
         if (empty($secretKey)) {
@@ -74,10 +77,7 @@ class Aims_Pledg_Block_Checkout_Form extends Mage_Core_Block_Template
 
         $signature = Mage::helper('aims_pledg/crypto')->generateSignature(array('data' => $pledgData), $secretKey);
 
-        if(Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-            Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
-            Mage::log($signature, null , "pledg.log", true);
-        }
+        Mage::helper('aims_pledg')->log($signature);
 
         return array(
             'signature' => $signature,
@@ -188,7 +188,7 @@ class Aims_Pledg_Block_Checkout_Form extends Mage_Core_Block_Template
                 'number_of_purchases' => (int)$orders->getSize(),
             ));
         } catch (\Exception $e) {
-            Mage::log(sprintf('Could not resolve order %s customer for pledg data : %s', $order->getIncrementId(), $e->getMessage()));
+            Mage::helper('aims_pledg')->log(sprintf('Could not resolve order %s customer for pledg data : %s', $order->getIncrementId(), $e->getMessage()), true);
         }
 
         return array();
