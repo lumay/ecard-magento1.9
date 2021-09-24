@@ -32,7 +32,7 @@ class Aims_Pledg_Block_System_Config_Form_Field_Image extends Mage_Adminhtml_Blo
         if (!(string)$element->getValue()) {
             $defaultImage = Mage::getBaseUrl('media') . 'aims_pledg/pledg_logo.png';
 
-            $html .= '<img src="' . $defaultImage . '" alt="Pledg logo" height="50" width="85" class="small-image-preview v-middle" />';
+            $html .= '<img src="' . $defaultImage . '" alt="Pledg logo" height="50" class="small-image-preview v-middle" />';
             $html .= '<p class="note"><span>'.Mage::helper('aims_pledg')->__('Upload a new image if you wish to replace this logo.') . '</span></p>';
         }
 

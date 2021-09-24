@@ -14,28 +14,6 @@
  */
 class Aims_Pledg_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    /**
-     * Return true if this is an admin session.
-     *
-     * @return bool
-     */
-    public function isAdmin()
-    {
-        return Mage::app()->getStore()->isAdmin();
-    }
-
-    /**
-     * Return true if file exists. Uses Varien_Io_File API.
-     *
-     * @param  string $fileName
-     * @return bool
-     */
-    public function fileExists($fileName)
-    {
-        $io = new Varien_Io_File();
-        return $io->fileExists($fileName);
-    }
-
     public function getReferenceByIncrementId($incrementId) {
         return 'order_'.$incrementId;
     }

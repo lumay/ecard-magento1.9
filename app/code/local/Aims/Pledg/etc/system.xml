@@ -12,78 +12,34 @@
     <sections>
         <payment>
             <groups>
-                <pledg_gateway ranslate="label" module="aims_pledg">
+                <pledg_gateway translate="label" module="aims_pledg">
                     <label>Pledg - Global Configuration</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>1</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
+                    <show_in_store>0</show_in_store>
                     <fields>
                         <staging translate="label">
                             <label>Test mode</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <config_path>pledg_gateway/payment/staging</config_path>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </staging>
-                        <active>
-                            <label>Enable</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </active>
                         <debug translate="label">
                             <label>Debug</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <config_path>pledg_gateway/payment/debug</config_path>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </debug>
-                        <title translate="label">
-                            <label>Title</label>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>30</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </title>
-                        <description translate="label">
-                            <label>Description</label>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>40</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </description>
-                        <gateway_logo translate="label">
-                            <label>Logo</label>
-                            <frontend_type>image</frontend_type>
-                            <backend_model>adminhtml/system_config_backend_image</backend_model>
-                            <frontend_model>aims_pledg/system_config_form_field_image</frontend_model>
-                            <upload_dir config="system/filesystem/media" scope_info="1">aims_pledg</upload_dir>
-                            <base_url type="media" scope_info="1">aims_pledg</base_url>
-                            <sort_order>50</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </gateway_logo>
-                        <sort_order translate="label">
-                            <label>Sort Order</label>
-                            <frontend_class>validate-number</frontend_class>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>130</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </sort_order>
                     </fields>
                 </pledg_gateway>
                 <pledg_gateway_1 translate="label" module="aims_pledg">
@@ -98,7 +54,7 @@
                             <label>Enable</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>20</sort_order>
+                            <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -106,7 +62,7 @@
                         <title translate="label">
                             <label>Title</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>30</sort_order>
+                            <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -114,37 +70,67 @@
                         <description translate="label">
                             <label>Description</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>40</sort_order>
+                            <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </description>
-                        <api_key translate="label">
-                            <label>Merchant UID</label>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>60</sort_order>
+                        <gateway_logo translate="label">
+                            <label>Logo</label>
+                            <frontend_type>image</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_image</backend_model>
+                            <frontend_model>aims_pledg/system_config_form_field_image</frontend_model>
+                            <upload_dir config="system/filesystem/media" scope_info="1">aims_pledg</upload_dir>
+                            <base_url type="media" scope_info="1">aims_pledg</base_url>
+                            <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </gateway_logo>
+                        <api_key_mapping translate="label comment">
+                            <label>Country / Merchant UID Mapping</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </api_key>
+                            <comment><![CDATA[Each line must contain "country_isocode2:merchant_uid". For example FR:mer_123456aa-a1b2-3cd4-e5f6-g7hi8jk90lmn .]]></comment>
+                        </api_key_mapping>
                         <secret_key translate="label">
                             <label>Signature</label>
                             <frontend_type>password</frontend_type>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </secret_key>
-                        <seuil translate="label tooltip">
-                            <label>Minimum amount to activate payment method</label>
-                            <tooltip>If you don't want to apply a minimum amount, set 0.</tooltip>
-                            <validate>validate-digits validate-not-negative-number</validate>
+                        <sort_order translate="label">
+                            <label>Sort Order</label>
+                            <frontend_class>validate-number</frontend_class>
                             <frontend_type>text</frontend_type>
                             <sort_order>70</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </seuil>
+                        </sort_order>
+                        <min_order_total translate="label">
+                            <label>Minimum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </min_order_total>
+                        <max_order_total translate="label">
+                            <label>Maximum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>90</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </max_order_total>
                     </fields>
                 </pledg_gateway_1>
                 <pledg_gateway_2 translate="label" module="aims_pledg">
@@ -159,7 +145,7 @@
                             <label>Enable</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>20</sort_order>
+                            <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -167,7 +153,7 @@
                         <title translate="label">
                             <label>Title</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>30</sort_order>
+                            <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -175,37 +161,67 @@
                         <description translate="label">
                             <label>Description</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>40</sort_order>
+                            <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </description>
-                        <api_key translate="label">
-                            <label>Merchant UID</label>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>60</sort_order>
+                        <gateway_logo translate="label">
+                            <label>Logo</label>
+                            <frontend_type>image</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_image</backend_model>
+                            <frontend_model>aims_pledg/system_config_form_field_image</frontend_model>
+                            <upload_dir config="system/filesystem/media" scope_info="1">aims_pledg</upload_dir>
+                            <base_url type="media" scope_info="1">aims_pledg</base_url>
+                            <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </gateway_logo>
+                        <api_key_mapping translate="label comment">
+                            <label>Country / Merchant UID Mapping</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </api_key>
+                            <comment><![CDATA[Each line must contain "country_isocode2:merchant_uid". For example FR:mer_123456aa-a1b2-3cd4-e5f6-g7hi8jk90lmn .]]></comment>
+                        </api_key_mapping>
                         <secret_key translate="label">
                             <label>Signature</label>
                             <frontend_type>password</frontend_type>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </secret_key>
-                        <seuil translate="label tooltip">
-                            <label>Minimum amount to activate payment method</label>
-                            <tooltip>If you don't want to apply a minimum amount, set 0.</tooltip>
-                            <validate>validate-digits validate-not-negative-number</validate>
+                        <sort_order translate="label">
+                            <label>Sort Order</label>
+                            <frontend_class>validate-number</frontend_class>
                             <frontend_type>text</frontend_type>
                             <sort_order>70</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </seuil>
+                        </sort_order>
+                        <min_order_total translate="label">
+                            <label>Minimum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </min_order_total>
+                        <max_order_total translate="label">
+                            <label>Maximum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>90</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </max_order_total>
                     </fields>
                 </pledg_gateway_2>
                 <pledg_gateway_3 translate="label" module="aims_pledg">
@@ -220,7 +236,7 @@
                             <label>Enable</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>20</sort_order>
+                            <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -228,7 +244,7 @@
                         <title translate="label">
                             <label>Title</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>30</sort_order>
+                            <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -236,37 +252,67 @@
                         <description translate="label">
                             <label>Description</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>40</sort_order>
+                            <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </description>
-                        <api_key translate="label">
-                            <label>Merchant UID</label>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>60</sort_order>
+                        <gateway_logo translate="label">
+                            <label>Logo</label>
+                            <frontend_type>image</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_image</backend_model>
+                            <frontend_model>aims_pledg/system_config_form_field_image</frontend_model>
+                            <upload_dir config="system/filesystem/media" scope_info="1">aims_pledg</upload_dir>
+                            <base_url type="media" scope_info="1">aims_pledg</base_url>
+                            <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </gateway_logo>
+                        <api_key_mapping translate="label comment">
+                            <label>Country / Merchant UID Mapping</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </api_key>
+                            <comment><![CDATA[Each line must contain "country_isocode2:merchant_uid". For example FR:mer_123456aa-a1b2-3cd4-e5f6-g7hi8jk90lmn .]]></comment>
+                        </api_key_mapping>
                         <secret_key translate="label">
                             <label>Signature</label>
                             <frontend_type>password</frontend_type>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </secret_key>
-                        <seuil translate="label tooltip">
-                            <label>Minimum amount to activate payment method</label>
-                            <tooltip>If you don't want to apply a minimum amount, set 0.</tooltip>
-                            <validate>validate-digits validate-not-negative-number</validate>
+                        <sort_order translate="label">
+                            <label>Sort Order</label>
+                            <frontend_class>validate-number</frontend_class>
                             <frontend_type>text</frontend_type>
                             <sort_order>70</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </seuil>
+                        </sort_order>
+                        <min_order_total translate="label">
+                            <label>Minimum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </min_order_total>
+                        <max_order_total translate="label">
+                            <label>Maximum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>90</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </max_order_total>
                     </fields>
                 </pledg_gateway_3>
                 <pledg_gateway_4 translate="label" module="aims_pledg">
@@ -281,7 +327,7 @@
                             <label>Enable</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>20</sort_order>
+                            <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -289,7 +335,7 @@
                         <title translate="label">
                             <label>Title</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>30</sort_order>
+                            <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -297,37 +343,67 @@
                         <description translate="label">
                             <label>Description</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>40</sort_order>
+                            <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </description>
-                        <api_key translate="label">
-                            <label>Merchant UID</label>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>60</sort_order>
+                        <gateway_logo translate="label">
+                            <label>Logo</label>
+                            <frontend_type>image</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_image</backend_model>
+                            <frontend_model>aims_pledg/system_config_form_field_image</frontend_model>
+                            <upload_dir config="system/filesystem/media" scope_info="1">aims_pledg</upload_dir>
+                            <base_url type="media" scope_info="1">aims_pledg</base_url>
+                            <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </gateway_logo>
+                        <api_key_mapping translate="label comment">
+                            <label>Country / Merchant UID Mapping</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </api_key>
+                            <comment><![CDATA[Each line must contain "country_isocode2:merchant_uid". For example FR:mer_123456aa-a1b2-3cd4-e5f6-g7hi8jk90lmn .]]></comment>
+                        </api_key_mapping>
                         <secret_key translate="label">
                             <label>Signature</label>
                             <frontend_type>password</frontend_type>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </secret_key>
-                        <seuil translate="label tooltip">
-                            <label>Minimum amount to activate payment method</label>
-                            <tooltip>If you don't want to apply a minimum amount, set 0.</tooltip>
-                            <validate>validate-digits validate-not-negative-number</validate>
+                        <sort_order translate="label">
+                            <label>Sort Order</label>
+                            <frontend_class>validate-number</frontend_class>
                             <frontend_type>text</frontend_type>
                             <sort_order>70</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </seuil>
+                        </sort_order>
+                        <min_order_total translate="label">
+                            <label>Minimum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </min_order_total>
+                        <max_order_total translate="label">
+                            <label>Maximum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>90</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </max_order_total>
                     </fields>
                 </pledg_gateway_4>
                 <pledg_gateway_5 translate="label" module="aims_pledg">
@@ -342,7 +418,7 @@
                             <label>Enable</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>20</sort_order>
+                            <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -350,7 +426,7 @@
                         <title translate="label">
                             <label>Title</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>30</sort_order>
+                            <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -358,37 +434,67 @@
                         <description translate="label">
                             <label>Description</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>40</sort_order>
+                            <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </description>
-                        <api_key translate="label">
-                            <label>Merchant UID</label>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>60</sort_order>
+                        <gateway_logo translate="label">
+                            <label>Logo</label>
+                            <frontend_type>image</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_image</backend_model>
+                            <frontend_model>aims_pledg/system_config_form_field_image</frontend_model>
+                            <upload_dir config="system/filesystem/media" scope_info="1">aims_pledg</upload_dir>
+                            <base_url type="media" scope_info="1">aims_pledg</base_url>
+                            <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </gateway_logo>
+                        <api_key_mapping translate="label comment">
+                            <label>Country / Merchant UID Mapping</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </api_key>
+                            <comment><![CDATA[Each line must contain "country_isocode2:merchant_uid". For example FR:mer_123456aa-a1b2-3cd4-e5f6-g7hi8jk90lmn .]]></comment>
+                        </api_key_mapping>
                         <secret_key translate="label">
                             <label>Signature</label>
                             <frontend_type>password</frontend_type>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </secret_key>
-                        <seuil translate="label tooltip">
-                            <label>Minimum amount to activate payment method</label>
-                            <tooltip>If you don't want to apply a minimum amount, set 0.</tooltip>
-                            <validate>validate-digits validate-not-negative-number</validate>
+                        <sort_order translate="label">
+                            <label>Sort Order</label>
+                            <frontend_class>validate-number</frontend_class>
                             <frontend_type>text</frontend_type>
                             <sort_order>70</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </seuil>
+                        </sort_order>
+                        <min_order_total translate="label">
+                            <label>Minimum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </min_order_total>
+                        <max_order_total translate="label">
+                            <label>Maximum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>90</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </max_order_total>
                     </fields>
                 </pledg_gateway_5>
                 <pledg_gateway_6 translate="label" module="aims_pledg">
@@ -403,7 +509,7 @@
                             <label>Enable</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>20</sort_order>
+                            <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -411,7 +517,7 @@
                         <title translate="label">
                             <label>Title</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>30</sort_order>
+                            <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -419,37 +525,67 @@
                         <description translate="label">
                             <label>Description</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>40</sort_order>
+                            <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </description>
-                        <api_key translate="label">
-                            <label>Merchant UID</label>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>60</sort_order>
+                        <gateway_logo translate="label">
+                            <label>Logo</label>
+                            <frontend_type>image</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_image</backend_model>
+                            <frontend_model>aims_pledg/system_config_form_field_image</frontend_model>
+                            <upload_dir config="system/filesystem/media" scope_info="1">aims_pledg</upload_dir>
+                            <base_url type="media" scope_info="1">aims_pledg</base_url>
+                            <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </gateway_logo>
+                        <api_key_mapping translate="label comment">
+                            <label>Country / Merchant UID Mapping</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </api_key>
+                            <comment><![CDATA[Each line must contain "country_isocode2:merchant_uid". For example FR:mer_123456aa-a1b2-3cd4-e5f6-g7hi8jk90lmn .]]></comment>
+                        </api_key_mapping>
                         <secret_key translate="label">
                             <label>Signature</label>
                             <frontend_type>password</frontend_type>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </secret_key>
-                        <seuil translate="label tooltip">
-                            <label>Minimum amount to activate payment method</label>
-                            <tooltip>If you don't want to apply a minimum amount, set 0.</tooltip>
-                            <validate>validate-digits validate-not-negative-number</validate>
+                        <sort_order translate="label">
+                            <label>Sort Order</label>
+                            <frontend_class>validate-number</frontend_class>
                             <frontend_type>text</frontend_type>
                             <sort_order>70</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </seuil>
+                        </sort_order>
+                        <min_order_total translate="label">
+                            <label>Minimum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </min_order_total>
+                        <max_order_total translate="label">
+                            <label>Maximum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>90</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </max_order_total>
                     </fields>
                 </pledg_gateway_6>
                 <pledg_gateway_7 translate="label" module="aims_pledg">
@@ -464,7 +600,7 @@
                             <label>Enable</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>20</sort_order>
+                            <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -472,7 +608,7 @@
                         <title translate="label">
                             <label>Title</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>30</sort_order>
+                            <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -480,37 +616,67 @@
                         <description translate="label">
                             <label>Description</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>40</sort_order>
+                            <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </description>
-                        <api_key translate="label">
-                            <label>Merchant UID</label>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>60</sort_order>
+                        <gateway_logo translate="label">
+                            <label>Logo</label>
+                            <frontend_type>image</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_image</backend_model>
+                            <frontend_model>aims_pledg/system_config_form_field_image</frontend_model>
+                            <upload_dir config="system/filesystem/media" scope_info="1">aims_pledg</upload_dir>
+                            <base_url type="media" scope_info="1">aims_pledg</base_url>
+                            <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </gateway_logo>
+                        <api_key_mapping translate="label comment">
+                            <label>Country / Merchant UID Mapping</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </api_key>
+                            <comment><![CDATA[Each line must contain "country_isocode2:merchant_uid". For example FR:mer_123456aa-a1b2-3cd4-e5f6-g7hi8jk90lmn .]]></comment>
+                        </api_key_mapping>
                         <secret_key translate="label">
                             <label>Signature</label>
                             <frontend_type>password</frontend_type>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </secret_key>
-                        <seuil translate="label tooltip">
-                            <label>Minimum amount to activate payment method</label>
-                            <tooltip>If you don't want to apply a minimum amount, set 0.</tooltip>
-                            <validate>validate-digits validate-not-negative-number</validate>
+                        <sort_order translate="label">
+                            <label>Sort Order</label>
+                            <frontend_class>validate-number</frontend_class>
                             <frontend_type>text</frontend_type>
                             <sort_order>70</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </seuil>
+                        </sort_order>
+                        <min_order_total translate="label">
+                            <label>Minimum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </min_order_total>
+                        <max_order_total translate="label">
+                            <label>Maximum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>90</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </max_order_total>
                     </fields>
                 </pledg_gateway_7>
                 <pledg_gateway_8 translate="label" module="aims_pledg">
@@ -525,7 +691,7 @@
                             <label>Enable</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>20</sort_order>
+                            <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -533,7 +699,7 @@
                         <title translate="label">
                             <label>Title</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>30</sort_order>
+                            <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -541,37 +707,67 @@
                         <description translate="label">
                             <label>Description</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>40</sort_order>
+                            <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </description>
-                        <api_key translate="label">
-                            <label>Merchant UID</label>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>60</sort_order>
+                        <gateway_logo translate="label">
+                            <label>Logo</label>
+                            <frontend_type>image</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_image</backend_model>
+                            <frontend_model>aims_pledg/system_config_form_field_image</frontend_model>
+                            <upload_dir config="system/filesystem/media" scope_info="1">aims_pledg</upload_dir>
+                            <base_url type="media" scope_info="1">aims_pledg</base_url>
+                            <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </gateway_logo>
+                        <api_key_mapping translate="label comment">
+                            <label>Country / Merchant UID Mapping</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </api_key>
+                            <comment><![CDATA[Each line must contain "country_isocode2:merchant_uid". For example FR:mer_123456aa-a1b2-3cd4-e5f6-g7hi8jk90lmn .]]></comment>
+                        </api_key_mapping>
                         <secret_key translate="label">
                             <label>Signature</label>
                             <frontend_type>password</frontend_type>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
+                            <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </secret_key>
-                        <seuil translate="label tooltip">
-                            <label>Minimum amount to activate payment method</label>
-                            <tooltip>If you don't want to apply a minimum amount, set 0.</tooltip>
-                            <validate>validate-digits validate-not-negative-number</validate>
+                        <sort_order translate="label">
+                            <label>Sort Order</label>
+                            <frontend_class>validate-number</frontend_class>
                             <frontend_type>text</frontend_type>
                             <sort_order>70</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </seuil>
+                        </sort_order>
+                        <min_order_total translate="label">
+                            <label>Minimum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </min_order_total>
+                        <max_order_total translate="label">
+                            <label>Maximum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-not-negative-number</validate>
+                            <sort_order>90</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </max_order_total>
                     </fields>
                 </pledg_gateway_8>
             </groups>

@@ -9,9 +9,16 @@
             <block type="aims_pledg/head" name="aims_pledg_head" template="aims_pledg/head.phtml"/>
         </reference>
         <reference name="content">
-            <block type="aims_pledg/checkout_form" name="pledg_checkout_form" template="aims_pledg/checkout/form.phtml"/>
+            <block type="aims_pledg/checkout_form" name="pledg_checkout_form" template="aims_pledg/form.phtml"/>
         </reference>
     </aims_pledg_checkout_form>
+    <checkout_onepage_index>
+        <reference name="head">
+            <action method="addCss">
+                <stylesheet>css/aims/pledg.css</stylesheet>
+            </action>
+        </reference>
+    </checkout_onepage_index>
     <aw_onestepcheckout_index_index>
         <reference name="head">
             <action method="addCss">
