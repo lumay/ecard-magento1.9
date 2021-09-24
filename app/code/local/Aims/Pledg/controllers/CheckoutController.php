@@ -36,98 +36,68 @@ class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
 
     public function formAction()
     {
-        $order = $this->getOrder();
+        try {
+            $order = $this->getOrder(array(
+                Mage_Sales_Model_Order::STATE_NEW
+            ));
 
-        // Check order status
-        if (!$order || !$order->getEntityId()) {
-            return $this->errorOrder('Order not exists');
+            $merchantApiKey = Mage::helper('aims_pledg')->getMerchantIdForOrder($order);
+            if ($merchantApiKey === null) {
+                throw new \Exception(sprintf(
+                    'Could not retrieve api key for country %s on order %s',
+                    $order->getBillingAddress()->getCountryId(),
+                    $order->getIncrementId()
+                ));
+            }
+
+            $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true, $this->__('Customer accessed payment page'));
+            $order->save();
+
+            Mage::register('pledg_order', $order);
+
+            $this->loadLayout();
+            $this->renderLayout();
+        } catch (\Exception $e) {
+            Mage::log('An error occurred on pledg payment page : ' . $e->getMessage());
+            $this->getCheckoutSession()->addError($this->__('An error occurred while processing your payment. Please try again.'));
+
+            return $this->_redirect('checkout/cart', array('_secure'=> false));
         }
-
-        Mage::register('pledg_order', $order);
-
-        $this->loadLayout();
-        $this->renderLayout();
-    }
-
-    public function successAction() {
-
-        $orderId = $this->getRequest()->getParam('order_id');
-        $order =  $this->getOrderById($orderId);
-
-        if (!$order && !$order->getEntityId()) {
-            return $this->errorOrder('Order not exists');
-        }
-
-        $this->setOrder($order);
-
-        // Decode secret
-        $dataPledg = explode('#'.$this->getOrder()->getPayment()->getMethod().'#',
-            base64_decode($this->getRequest()->getParam('secret'))
-        );
-
-        if(Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-            Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
-            Mage::log($this->getRequest()->getParams(), null , "pledg.log", true);
-            Mage::log($dataPledg, null , "pledg.log", true);
-        }
-
-        if (count($dataPledg) != 3) {
-            return $this->errorOrder('Secret Pledg invalid count');
-        }
-
-        // Check merchant uid
-        if ($this->getMerchantUid() != $dataPledg[2]) {
-            return $this->errorOrder('Secret Pledg invalid uid');
-        }
-
-        // Check transaction id
-        $transactionId = $dataPledg[0];
-        if ($transactionId != $this->getRequest()->getParam('transaction_id')) {
-            return $this->errorOrder('Pledg Transaction ID invalid');
-        }
-
-        // Check quote id
-        if ($dataPledg[1] != $this->getOrder()->getEntityId()) {
-            return $this->errorOrder('Secret Pledg invalid quote');
-        }
-
-        $this->getCheckoutSession()->setLastQuoteId($order->getQuoteId())
-            ->setLastSuccessQuoteId($order->getQuoteId())
-            ->setLastOrderId($order->getId())
-            ->setLastRealOrderId($order->getIncrementId())
-            ->setLastOrderStatus($order->getStatus());
-
-        return $this->_redirect('checkout/onepage/success', array('_secure'=> false));
     }
 
     /**
      * Cancel action
      */
-    public function cancelAction() {
-        $orderId = $this->getRequest()->getParam('order_id');
-        $order =  $this->getOrderById($orderId);
+    public function cancelAction()
+    {
+        try {
+            $order = $this->getOrder(array(
+                Mage_Sales_Model_Order::STATE_NEW,
+                Mage_Sales_Model_Order::STATE_PENDING_PAYMENT
+            ));
 
-        $errorMessage = $this->getRequest()->getParam('error');
-
-        if ($order && $order->getId()) {
-            if(Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-                Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
-                Mage::log("Pledg: ".($order->getIncrementId())." has been canceled. Error : " . $errorMessage, null , "pledg.log", true);
+            $comment = $this->__('Payment has been cancelled by customer');
+            $errorMessage = $this->getRequest()->getParam('pledg_error');
+            if (!empty($errorMessage)) {
+                $comment = $this->__($errorMessage);
             }
+            $this->getCheckoutHelper()->cancelCurrentOrder($comment, $order);
+            $this->getCheckoutHelper()->restoreQuote();
 
-            $this->setOrder($order);
-
-            $this->getCheckoutHelper()->cancelCurrentOrder("Pledg: ".($order->getIncrementId())." has been canceled. Error : " . $errorMessage, $order);
-            $this->getCheckoutHelper()->restoreQuote($order);
-
-            if($errorMessage == "Bouton Retour") {
-                $this->getCheckoutSession()->addError($this->__("Your Pledg payment has been cancelled."));
+            if (!empty($errorMessage)) {
+                $this->getCheckoutSession()->addError($this->__('An error occurred while processing your payment.'));
             } else {
-                $this->getCheckoutSession()->addError($this->__("Your Pledg payment has been cancelled : %s.", $errorMessage));
+                $this->getCheckoutSession()->addSuccess($this->__('Your payment has successfully been cancelled.'));
             }
-            
+        } catch (\Exception $e) {
+            Mage::log('An error occurred on pledg cancel page : ' . $e->getMessage());
+
+            $this->getCheckoutSession()->addError(
+                $this->__('An error occurred while cancelling your order. Please try again.')
+            );
         }
-        $this->_redirect('checkout/cart');
+
+        return $this->_redirect('checkout/cart');
     }
 
     public function notificationsAction()

@@ -15,18 +15,13 @@
  */
 class Aims_Pledg_Helper_Config extends Mage_Core_Helper_Abstract
 {
-    public function getPledgIsActive()
-    {
-        return Mage::getStoreConfig('payment/pledg_gateway/active');
-    }
-
     public function getPledgIsStaging()
     {
-        return Mage::getStoreConfig('payment/pledg_gateway/staging');
+        return Mage::getStoreConfig('pledg_gateway/payment/staging');
     }
 
     public function getPledgIsInDebugMode()
     {
-        return Mage::getStoreConfig('payment/pledg_gateway/debug');
+        return Mage::getStoreConfig('pledg_gateway/payment/debug');
     }
 }

@@ -20,9 +20,4 @@ class Aims_Pledg_Block_Head extends Mage_Core_Block_Template
 
         return 'https://s3-eu-west-1.amazonaws.com/pledg-assets/ecard-plugin/master/plugin.min.js';
     }
-
-    public function isActive()
-    {
-        return Mage::helper('aims_pledg/config')->getPledgIsActive();
-    }
 }

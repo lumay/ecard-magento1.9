@@ -11,26 +11,10 @@ class Aims_Pledg_Block_Checkout_Form extends Mage_Core_Block_Template
 {
     protected $_order;
 
-    public function getLogoSrc()
-    {
-        $logo = Mage::getStoreConfig('design/header/logo_src');
-        return $this->getSkinUrl($logo);
-    }
-
-    public function getLogoAlt()
-    {
-        return Mage::getStoreConfig('design/header/logo_alt');
-    }
-
     public function getOrder()
     {
-        if(!$this->_order) {
+        if (!$this->_order) {
             $order = Mage::registry('pledg_order');
-
-            if($order == null) {
-                $this->_getCheckoutSession()->addError('Unable to get order from loaded order id.');
-                $this->_redirect('checkout/onepage/error', array('_secure'=> false));
-            }
 
             $this->_order = $order;
         }
@@ -38,67 +22,222 @@ class Aims_Pledg_Block_Checkout_Form extends Mage_Core_Block_Template
         return $this->_order;
     }
 
-    protected function _getCheckoutSession() {
-        return Mage::getSingleton('checkout/session');
-    }
-
-    public function getGatewayConfig()
+    /**
+     * @return array
+     */
+    public function getPledgData()
     {
-        return Mage::helper('aims_pledg')->getGatewayConfig($this->getOrder());
-    }
-
-    public function getMerchantUid() {
-        return $this->getGatewayConfig()->getMerchantNumber();
-    }
-
-    protected function _getSecreKey() {
-        return $this->getGatewayConfig()->getSecretKey();
-    }
-
-    public function getGeneratedSignature() {
+        /** @var Mage_Sales_Model_Order $order */
         $order = $this->getOrder();
+        $orderIncrementId = $order->getIncrementId();
+        $orderAddress = $order->getBillingAddress();
 
-        $query = array('data' => array(
-            "expireIn" => strtotime("+1 day"),
-            "merchantUid" => $this->getMerchantUid(),
-            "amountCents" => round(($order->getTotalDue() * 100), 0),
-            "email" => $order->getCustomerEmail(),
-            "title" => 'Order ' . $order->getIncrementId(),
-            "reference" => Mage::helper('aims_pledg')->getReferenceByIncrementId($order->getIncrementId()),
-            "firstName" => $order->getCustomerFirstname(),
-            "lastName" => $order->getCustomerLastname(),
-            "currency" => $order->getOrderCurrencyCode(),
-            "phoneNumber" => $order->getBillingAddress()->getPortable(),
-            "address" => array(
-                "street" => $order->getBillingAddress()->getStreet(1),
-                "city" => $order->getBillingAddress()->getCity(),
-                "zipcode" => $order->getBillingAddress()->getPostcode(),
-                "stateProvince" => $order->getBillingAddress()->getRegion(),
-                "country" => $order->getBillingAddress()->getCountryId()
-            ),
-            "shipping_address" => array(
-                "street" => $order->getShippingAddress()->getStreet(1),
-                "city" => $order->getShippingAddress()->getCity(),
-                "zipcode" => $order->getShippingAddress()->getPostcode(),
-                "stateProvince" => $order->getShippingAddress()->getRegion(),
-                "country" => $order->getShippingAddress()->getCountryId()
-            ),
-            "showCloseButton" => true,
-            'paymentNotificationUrl' => $this->getUrl('pledg/checkout/notifications')
-        ));
+        $pledgData = array(
+            'merchantUid' => Mage::helper('aims_pledg')->getMerchantIdForOrder($order),
+            'amountCents' => round($order->getGrandTotal() * 100),
+            'email' => $order->getCustomerEmail(),
+            'title' => 'Order ' . $orderIncrementId,
+            'reference' => Mage::helper('aims_pledg')->getReferenceByIncrementId($order->getIncrementId()),
+            'firstName' => $orderAddress->getFirstname(),
+            'lastName' => $orderAddress->getLastname(),
+            'currency' => $order->getOrderCurrencyCode(),
+            'lang' => $this->getLang(),
+            'countryCode' => $orderAddress->getCountryId(),
+            'address' => $this->getAddressData($orderAddress),
+            'metadata' => $this->getMetaData($order),
+            'showCloseButton' => true,
+            'paymentNotificationUrl' => $this->getUrl('pledg/checkout/notifications', array(
+                '_secure' => true,
+                'ipn_store_id' => $order->getStoreId(),
+                'pledg_method' => $order->getPayment()->getMethodInstance()->getCode(),
+            )),
+        );
 
-        if(Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
-            Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
-            Mage::log($query, null , "pledg.log", true);
+        if (!$order->getIsVirtual()) {
+            $pledgData['shipping_address'] = $this->getAddressData($order->getShippingAddress());
         }
 
-        $signature = Mage::helper('aims_pledg/crypto')->generateSignature($query, $this->_getSecreKey());
+        $telephone = $orderAddress->getTelephone();
+        if (!empty($telephone)) {
+            $pledgData['phoneNumber'] = preg_replace('/^(\+|00)(.*)$/', '$2', $telephone);
+        }
+
+        if (Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
+            Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
+            Mage::log($pledgData, null , "pledg.log", true);
+        }
+
+        $secretKey = $order->getPayment()->getMethodInstance()->getConfigData('secret_key', $order->getStoreId());
+        if (empty($secretKey)) {
+            return $this->encodeData($pledgData);
+        }
+
+        $signature = Mage::helper('aims_pledg/crypto')->generateSignature(array('data' => $pledgData), $secretKey);
 
         if(Mage::helper('aims_pledg/config')->getPledgIsInDebugMode()) {
             Mage::log(__METHOD__ . " " . __LINE__, null , "pledg.log", true);
             Mage::log($signature, null , "pledg.log", true);
         }
 
-        return $signature;
+        return array(
+            'signature' => $signature,
+        );
+    }
+
+    /**
+     * @return string
+     */
+    private function getLang()
+    {
+        $lang = Mage::getStoreConfig('general/locale/code');
+
+        $allowedLangs = array(
+            'fr_FR',
+            'de_DE',
+            'en_GB',
+            'es_ES',
+            'it_IT',
+            'nl_NL',
+        );
+
+        if (in_array($lang, $allowedLangs)) {
+            return $lang;
+        }
+
+        return reset($allowedLangs);
+    }
+
+    /**
+     * @param Mage_Sales_Model_Order_Address $orderAddress
+     *
+     * @return array
+     */
+    private function getAddressData($orderAddress)
+    {
+        return array(
+            'street' => $orderAddress->getStreet(1),
+            'city' => $orderAddress->getCity(),
+            'zipcode' => (string)$orderAddress->getPostcode(),
+            'stateProvince' => (string)$orderAddress->getRegion(),
+            'country' => $orderAddress->getCountryId(),
+        );
+    }
+
+    /**
+     * @param Mage_Sales_Model_Order $order
+     *
+     * @return array
+     */
+    private function getMetaData($order)
+    {
+        $physicalProductTypes = array(
+            'simple',
+            'configurable',
+            'bundle',
+            'grouped',
+        );
+
+        $products = array();
+        /** @var Mage_Sales_Model_Order_Item $item */
+        foreach ($order->getAllVisibleItems() as $item) {
+            $productType = $item->getProductType();
+            $products[] = array(
+                'reference' => $item->getSku(),
+                'type' => in_array($productType, $physicalProductTypes) ? 'physical' : 'virtual',
+                'quantity' => (int)$item->getQtyOrdered(),
+                'name' => $item->getName(),
+                'unit_amount_cents' => round($item->getPriceInclTax() * 100),
+            );
+            if (count($products) === 5) {
+                // Metadata field is limited in size
+                // Include max 5 products information
+                break;
+            }
+        }
+
+        return array_merge(array(
+            'plugin' => sprintf(
+                'magento%s-pledg-plugin%s',
+                Mage::getVersion(),
+                Mage::getConfig()->getModuleConfig('Aims_Pledg')->version
+            ),
+            'products' => $products,
+        ), $this->getCustomerData($order));
+    }
+
+    /**
+     * @param Mage_Sales_Model_Order $order
+     *
+     * @return array
+     */
+    private function getCustomerData($order)
+    {
+        $customerId = (int)$order->getCustomerId();
+        if (empty($customerId)) {
+            return array();
+        }
+
+        try {
+            $customer = Mage::getModel('customer/customer')->load($customerId);
+            $orders = Mage::getResourceModel('sales/order_collection')
+                ->addFieldToFilter('customer_id', Mage::getSingleton('customer/session')->getCustomer()->getId())
+            ;
+
+            return array('account' => array(
+                'creation_date' => (new \DateTime($customer->getCreatedAt()))->format('Y-m-d'),
+                'number_of_purchases' => (int)$orders->getSize(),
+            ));
+        } catch (\Exception $e) {
+            Mage::log(sprintf('Could not resolve order %s customer for pledg data : %s', $order->getIncrementId(), $e->getMessage()));
+        }
+
+        return array();
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return array
+     */
+    private function encodeData($data)
+    {
+        $convertedData = array();
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $convertedData[$key] = $this->encodeData($value);
+                continue;
+            }
+
+            if (mb_check_encoding($value, 'UTF-8') === false) {
+                $value = $this->convToUtf8($value);
+            }
+            $convertedData[$key] = $value;
+        }
+
+        return $convertedData;
+    }
+
+    /**
+     * @param string $stringToEncode
+     * @param string $encodingTypes
+     *
+     * @return string
+     */
+    private function convToUtf8(
+        $stringToEncode,
+        $encodingTypes = "UTF-8,ASCII,windows-1252,ISO-8859-15,ISO-8859-1"
+    ) {
+        $detect = mb_detect_encoding($stringToEncode, $encodingTypes, true);
+        if ($detect && $detect !== "UTF-8") {
+            if ($detect === 'ISO-8859-15') {
+                $stringToEncode = preg_replace('/\x9c/', '|oe|', $stringToEncode);
+            }
+            $stringToEncode = iconv($detect, "UTF-8", $stringToEncode);
+            if ($detect === 'ISO-8859-15') {
+                $stringToEncode = preg_replace('/\|oe\|/', 'œ', $stringToEncode);
+            }
+        }
+
+        return $stringToEncode;
     }
 }

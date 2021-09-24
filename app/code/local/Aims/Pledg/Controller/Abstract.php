@@ -31,16 +31,39 @@ class Aims_Pledg_Controller_Abstract extends Mage_Core_Controller_Front_Action
         $this->_order = $order;
     }
 
-    protected function getOrder()
+    /**
+     * @param array $validStates
+     *
+     * @return Mage_Sales_Model_Order
+     *
+     * @throws Exception
+     */
+    protected function getOrder($validStates)
     {
-        if(!$this->_order) {
+        if (!$this->_order) {
             $orderId = $this->getCheckoutSession()->getLastRealOrderId();
 
             if (!isset($orderId)) {
-                return null;
+                throw new \Exception('Could not retrieve last order id');
             }
-            $this->_order =$this->getOrderById($orderId);
+            $order = $this->getOrderById($orderId);
+
+            if ($order === null) {
+                throw new \Exception(sprintf('Could not retrieve order with id %s', $orderId));
+            }
+
+            $paymentMethod = $order->getPayment()->getMethodInstance();
+            if (strstr($paymentMethod->getCode(), 'pledg_gateway_') === false) {
+                throw new \Exception(sprintf('Order with method %s wrongfully accessed Pledg page', $paymentMethod->getCode()));
+            }
+
+            if (!in_array($order->getState(), $validStates)) {
+                throw new \Exception(sprintf('Order with state %s wrongfully accessed Pledg page', $order->getState()));
+            }
+
+            $this->_order = $order;
         }
+
         return $this->_order;
     }
 
