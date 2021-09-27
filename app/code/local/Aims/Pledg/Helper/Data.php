@@ -14,13 +14,26 @@
  */
 class Aims_Pledg_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public function getReferenceByIncrementId($incrementId) {
-        return 'order_'.$incrementId;
+    const ORDER_REFERENCE_PREFIX = 'order_';
+
+    /**
+     * @param string $incrementId
+     *
+     * @return string
+     */
+    public function getReferenceByIncrementId($incrementId)
+    {
+        return self::ORDER_REFERENCE_PREFIX . $incrementId;
     }
 
-    public function getIncrementIdByReference($reference) {
-        $refeArray = explode('_',$reference);
-        return $refeArray[1];
+    /**
+     * @param string $reference
+     *
+     * @return string
+     */
+    public function getIncrementIdByReference($reference)
+    {
+        return str_replace(self::ORDER_REFERENCE_PREFIX, '', $reference);
     }
 
     public function getGatewayConfig($order)
