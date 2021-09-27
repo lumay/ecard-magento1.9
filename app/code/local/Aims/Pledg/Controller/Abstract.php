@@ -9,26 +9,25 @@
 
 class Aims_Pledg_Controller_Abstract extends Mage_Core_Controller_Front_Action
 {
-    protected $_order;
+    /**
+     * @var Mage_Sales_Model_Order
+     */
+    protected $order;
 
-    protected function getCheckoutSession() {
+    /**
+     * @return Mage_Checkout_Model_Session
+     */
+    protected function getCheckoutSession()
+    {
         return Mage::getSingleton('checkout/session');
     }
 
-    protected function getDataHelper() {
-        return Mage::helper('aims_pledg');
-    }
-
-    protected function getCheckoutHelper() {
+    /**
+     * @return Aims_Pledg_Helper_Checkout
+     */
+    protected function getCheckoutHelper()
+    {
         return Mage::helper('aims_pledg/checkout');
-    }
-
-    protected function getGatewayConfig() {
-        return $this->getOrder()->getPayment()->getMethodInstance();
-    }
-
-    protected function setOrder($order) {
-        $this->_order = $order;
     }
 
     /**
@@ -40,7 +39,7 @@ class Aims_Pledg_Controller_Abstract extends Mage_Core_Controller_Front_Action
      */
     protected function getOrder($validStates)
     {
-        if (!$this->_order) {
+        if (!$this->order) {
             $orderId = $this->getCheckoutSession()->getLastRealOrderId();
 
             if (!isset($orderId)) {
@@ -61,12 +60,17 @@ class Aims_Pledg_Controller_Abstract extends Mage_Core_Controller_Front_Action
                 throw new \Exception(sprintf('Order with state %s wrongfully accessed Pledg page', $order->getState()));
             }
 
-            $this->_order = $order;
+            $this->order = $order;
         }
 
-        return $this->_order;
+        return $this->order;
     }
 
+    /**
+     * @param string $orderId
+     *
+     * @return Mage_Sales_Model_Order
+     */
     protected function getOrderById($orderId)
     {
         $order = Mage::getModel('sales/order')->loadByIncrementId($orderId);
@@ -76,9 +80,5 @@ class Aims_Pledg_Controller_Abstract extends Mage_Core_Controller_Front_Action
         }
 
         return $order;
-    }
-
-    protected function getMerchantUid() {
-        return $this->getGatewayConfig()->getMerchantNumber();
     }
 }

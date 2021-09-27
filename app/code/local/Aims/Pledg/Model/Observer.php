@@ -9,32 +9,6 @@
 
 class Aims_Pledg_Model_Observer
 {
-    public function setPledgPaymentMethod(Varien_Event_Observer $observer)
-    {
-        $controller = $observer->getControllerAction();
-        $action = $controller->getFullActionName();
-
-        if($action != "aw_onestepcheckout_ajax_placeOrder" &&
-            $action != "aw_onestepcheckout_ajax_savePaymentMethod" ) {
-            return;
-        }
-
-        /** @var Mage_Core_Controller_Request_Http $request */
-        $request = $controller->getRequest();
-        if (!$request->isPost() || !$request->isAjax() || !$request->getPost('payment')) {
-            return;
-        }
-
-        $payment = $request->getPost('payment');
-        if(!empty($payment['pledg_method'])) {
-            $payment['method'] = $payment['pledg_method'];
-            $request->setPost("payment", $payment);
-
-            Mage::register('pledg_gateway_available', $payment['pledg_method']);
-        }
-
-    }
-
     /**
      * @param Varien_Event_Observer $observer
      */

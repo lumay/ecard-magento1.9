@@ -57,17 +57,6 @@
                 </Aims_Pledg>
             </modules>
         </translate>
-        <events>
-            <controller_action_predispatch>
-                <observers>
-                    <aims_pledg_payment_predispatch>
-                        <type>singleton</type>
-                        <class>Aims_Pledg_Model_Observer</class>
-                        <method>setPledgPaymentMethod</method>
-                    </aims_pledg_payment_predispatch>
-                </observers>
-            </controller_action_predispatch>
-        </events>
     </frontend>
     <adminhtml>
         <events>

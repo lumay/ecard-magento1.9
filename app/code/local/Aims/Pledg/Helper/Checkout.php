@@ -16,15 +16,6 @@
 class Aims_Pledg_Helper_Checkout extends Mage_Core_Helper_Abstract
 {
     /**
-     * @var Mage_Checkout_Model_Session
-     */
-    protected $_session;
-
-    public function __construct() {
-        $this->_session = Mage::getSingleton('checkout/session');
-    }
-
-    /**
      * Cancel last placed order with specified comment message
      *
      * @param string $comment Comment appended to order history
@@ -53,7 +44,8 @@ class Aims_Pledg_Helper_Checkout extends Mage_Core_Helper_Abstract
      */
     public function restoreQuote()
     {
-        $lastQuoteId = $this->_session->getLastSuccessQuoteId();
+        $session = Mage::getSingleton('checkout/session');
+        $lastQuoteId = $session->getLastSuccessQuoteId();
 
         if ($lastQuoteId) {
             $quote = $this->_getQuote($lastQuoteId);
@@ -61,7 +53,7 @@ class Aims_Pledg_Helper_Checkout extends Mage_Core_Helper_Abstract
                 $quote->setIsActive(1)
                     ->setReservedOrderId(null)
                     ->save();
-                $this->_session
+                $session
                     ->replaceQuote($quote)
                     ->unsLastRealOrderId();
             }

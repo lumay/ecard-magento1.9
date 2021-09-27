@@ -33,15 +33,14 @@ class Aims_Pledg_Helper_Crypto extends Mage_Core_Helper_Abstract
         return $jwt;
     }
 
+    /**
+     * @param string $query
+     * @param string $secretKey
+     *
+     * @return array
+     */
     public function decryptSignature($query, $secretKey)
     {
         return (array)\Firebase\JWT\JWT::decode($query, $secretKey, array('HS256'));
-    }
-
-    public function readSignature($query)
-    {
-        $jwt = \Firebase\JWT\JWT::read($query, array('HS256'));
-
-        return json_decode(json_encode($jwt), true);
     }
 }

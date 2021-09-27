@@ -61,7 +61,7 @@ class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
             $this->loadLayout();
             $this->renderLayout();
         } catch (\Exception $e) {
-            Mage::log('An error occurred on pledg payment page : ' . $e->getMessage());
+            Mage::helper('aims_pledg')->log('An error occurred on pledg payment page : ' . $e->getMessage(), true);
             $this->getCheckoutSession()->addError($this->__('An error occurred while processing your payment. Please try again.'));
 
             return $this->_redirect('checkout/cart', array('_secure'=> false));
@@ -93,7 +93,7 @@ class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
                 $this->getCheckoutSession()->addSuccess($this->__('Your payment has successfully been cancelled.'));
             }
         } catch (\Exception $e) {
-            Mage::log('An error occurred on pledg cancel page : ' . $e->getMessage());
+            Mage::helper('aims_pledg')->log('An error occurred on pledg cancel page : ' . $e->getMessage(), true);
 
             $this->getCheckoutSession()->addError(
                 $this->__('An error occurred while cancelling your order. Please try again.')
@@ -101,17 +101,6 @@ class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
         }
 
         return $this->_redirect('checkout/cart');
-    }
-
-    /**
-     * @param mixed $message
-     * @param bool  $forceLog
-     */
-    private function log($message, $forceLog = false)
-    {
-        if (Mage::helper('aims_pledg/config')->getPledgIsInDebugMode() || $forceLog) {
-            Mage::log($message, null, "pledg.log", true);
-        }
     }
 
     /**
@@ -148,21 +137,21 @@ class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
                 $secretKey = '';
             }
 
-            $this->log('Received IPN');
-            $this->log($params);
+            Mage::helper('aims_pledg')->log('Received IPN');
+            Mage::helper('aims_pledg')->log($params);
 
             if (isset($params['signature'])) {
                 if (count($params) === 1) {
-                    $this->log('Mode signed transfer');
+                    Mage::helper('aims_pledg')->log('Mode signed transfer');
 
                     $signature = $params['signature'];
                     $params = Mage::helper('aims_pledg/crypto')->decryptSignature($signature, $secretKey);
-                    $this->log('Decrypted message');
-                    $this->log($params);
+                    Mage::helper('aims_pledg')->log('Decrypted message');
+                    Mage::helper('aims_pledg')->log($params);
 
                     $this->handleTransferMode($params);
                 } else {
-                    $this->log('Mode signed back');
+                    Mage::helper('aims_pledg')->log('Mode signed back');
 
                     if ($params['signature'] !== $this->generateSignature($params, $secretKey)) {
                         throw new \Exception('Invalid signature');
@@ -171,11 +160,11 @@ class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
                     $this->handleBackMode($params);
                 }
             } else {
-                $this->log('Mode unsigned transfer');
+                Mage::helper('aims_pledg')->log('Mode unsigned transfer');
                 $this->handleTransferMode($params);
             }
         } catch (\Exception $e) {
-            $this->log('An error occurred while processing IPN : ' . $e->getMessage(), true);
+            Mage::helper('aims_pledg')->log('An error occurred while processing IPN : ' . $e->getMessage(), true);
 
             $success = false;
             $responseCode = 500;
@@ -186,8 +175,8 @@ class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
         $this->getResponse()->setHttpResponseCode($responseCode);
         $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($responseContent));
 
-        $this->log('IPN response [' . $responseCode . ']');
-        $this->log($responseContent);
+        Mage::helper('aims_pledg')->log('IPN response [' . $responseCode . ']');
+        Mage::helper('aims_pledg')->log($responseContent);
     }
 
     /**
@@ -237,12 +226,12 @@ class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
 
         $pledgStatus = $this->getValueFromArray($params, 'status');
         $transactionId = $this->getValueFromArray($params, 'id');
-        $this->log('Payment status received with back mode : ' . $pledgStatus);
+        Mage::helper('aims_pledg')->log('Payment status received with back mode : ' . $pledgStatus);
 
         $this->addPaymentInformation($order, $transactionId, self::MODE_BACK, $pledgStatus);
 
         if (in_array($pledgStatus, self::STATUS_COMPLETED)) {
-            $this->log('Invoice order after receiving back notification');
+            Mage::helper('aims_pledg')->log('Invoice order after receiving back notification');
             $this->invoiceOrder($order, $transactionId, str_replace(
                 '%1',
                 $pledgStatus,
@@ -253,7 +242,7 @@ class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
         }
 
         if (in_array($pledgStatus, self::STATUS_CANCELLED)) {
-            $this->log('Cancel order after receiving back notification');
+            Mage::helper('aims_pledg')->log('Cancel order after receiving back notification');
             if (!$order->canCancel()) {
                 throw new \Exception(sprintf('Order %s cannot be canceled', $order->getIncrementId()));
             }
@@ -267,7 +256,7 @@ class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
         }
 
         if (in_array($pledgStatus, self::STATUS_PENDING)) {
-            $this->log('Received back notification with Pending status. Do nothing');
+            Mage::helper('aims_pledg')->log('Received back notification with Pending status. Do nothing');
             $this->addMessageOnOrder($order, str_replace(
                 '%1',
                 $pledgStatus,
@@ -277,7 +266,7 @@ class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
             return;
         }
 
-        $this->log('Received unhandled status from Pledg back notification : ' . $pledgStatus, true);
+        Mage::helper('aims_pledg')->log('Received unhandled status from Pledg back notification : ' . $pledgStatus, true);
     }
 
     /**
@@ -291,7 +280,7 @@ class Aims_Pledg_CheckoutController extends Aims_Pledg_Controller_Abstract
 
         // In transfer mode, notification is only sent when payment is validated
         $transactionId = $this->getValueFromArray($params, 'purchase_uid');
-        $this->log('Invoice order after receiving transfer notification');
+        Mage::helper('aims_pledg')->log('Invoice order after receiving transfer notification');
 
         $this->addPaymentInformation($order, $transactionId, self::MODE_TRANSFER, 'completed');
         $this->invoiceOrder($order, $transactionId, $this->__('Received invoicing order from Pledg transfer notification'));
