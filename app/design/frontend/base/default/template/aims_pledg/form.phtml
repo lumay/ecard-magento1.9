@@ -1,0 +1,33 @@
+<?php
+/**
+ * AIMS
+ * @category   AIMS
+ * @package    Aims_Hypnia
+ * @copyright  Copyright (c) 2020 Unicode Systems. (http://www.unicodesystems.in)
+ * @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<button id="trigger_pledg_form"></button>
+<div id="container_pledg_form"></div>
+
+<?php $_order = $this->getOrder(); ?>
+
+<script type="text/javascript">
+  var button = document.querySelector("#trigger_pledg_form");
+  new Pledg(button, {
+      ...<?= json_encode($this->getPledgData()); ?>,
+      ...{
+          containerElement: document.querySelector('#container_pledg_form'),
+          onSuccess: function () {
+              window.location.replace('<?php echo $this->getUrl('checkout/onepage/success'); ?>');
+          },
+          onError: function (error) {
+              window.location.replace('<?php echo $this->getUrl('pledg/checkout/cancel');?>' + '?pledg_error=' + encodeURI(error.message));
+          },
+          onCancel: function () {
+              window.location.replace('<?php echo $this->getUrl('pledg/checkout/cancel');?>');
+          },
+      }
+  });
+  button.click();
+</script>

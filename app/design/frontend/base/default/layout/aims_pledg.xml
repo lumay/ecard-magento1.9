@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+    <aims_pledg_checkout_form>
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
+        <reference name="head">
+            <action method="addCss">
+                <stylesheet>css/aims/pledg.css</stylesheet>
+            </action>
+            <block type="aims_pledg/head" name="aims_pledg_head" template="aims_pledg/head.phtml"/>
+        </reference>
+        <reference name="content">
+            <block type="aims_pledg/checkout_form" name="pledg_checkout_form" template="aims_pledg/form.phtml"/>
+        </reference>
+    </aims_pledg_checkout_form>
+    <checkout_onepage_index>
+        <reference name="head">
+            <action method="addCss">
+                <stylesheet>css/aims/pledg.css</stylesheet>
+            </action>
+        </reference>
+    </checkout_onepage_index>
+    <aw_onestepcheckout_index_index>
+        <reference name="head">
+            <action method="addCss">
+                <stylesheet>css/aims/pledg.css</stylesheet>
+            </action>
+        </reference>
+    </aw_onestepcheckout_index_index>
+</layout>
