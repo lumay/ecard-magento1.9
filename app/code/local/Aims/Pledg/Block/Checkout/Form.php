@@ -98,6 +98,7 @@ class Aims_Pledg_Block_Checkout_Form extends Mage_Core_Block_Template
             'es_ES',
             'it_IT',
             'nl_NL',
+            'pt_PT',
         );
 
         if (in_array($lang, $allowedLangs)) {
