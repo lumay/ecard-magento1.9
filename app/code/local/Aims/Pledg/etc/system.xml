@@ -44,6 +44,7 @@
                 </pledg_gateway>
                 <pledg_gateway_1 translate="label" module="aims_pledg">
                     <label>Pledg - 1st Payment Method</label>
+                    <dynamic_group>1</dynamic_group>
                     <frontend_type>text</frontend_type>
                     <sort_order>2</sort_order>
                     <show_in_default>1</show_in_default>
@@ -135,6 +136,7 @@
                 </pledg_gateway_1>
                 <pledg_gateway_2 translate="label" module="aims_pledg">
                     <label>Pledg - 2nd Payment Method</label>
+                    <dynamic_group>1</dynamic_group>
                     <frontend_type>text</frontend_type>
                     <sort_order>3</sort_order>
                     <show_in_default>1</show_in_default>
@@ -226,6 +228,7 @@
                 </pledg_gateway_2>
                 <pledg_gateway_3 translate="label" module="aims_pledg">
                     <label>Pledg - 3rd Payment Method</label>
+                    <dynamic_group>1</dynamic_group>
                     <frontend_type>text</frontend_type>
                     <sort_order>4</sort_order>
                     <show_in_default>1</show_in_default>
@@ -317,6 +320,7 @@
                 </pledg_gateway_3>
                 <pledg_gateway_4 translate="label" module="aims_pledg">
                     <label>Pledg - 4th Payment Method</label>
+                    <dynamic_group>1</dynamic_group>
                     <frontend_type>text</frontend_type>
                     <sort_order>5</sort_order>
                     <show_in_default>1</show_in_default>
@@ -408,6 +412,7 @@
                 </pledg_gateway_4>
                 <pledg_gateway_5 translate="label" module="aims_pledg">
                     <label>Pledg - 5th Payment Method</label>
+                    <dynamic_group>1</dynamic_group>
                     <frontend_type>text</frontend_type>
                     <sort_order>6</sort_order>
                     <show_in_default>1</show_in_default>
@@ -499,6 +504,7 @@
                 </pledg_gateway_5>
                 <pledg_gateway_6 translate="label" module="aims_pledg">
                     <label>Pledg - 6th Payment Method</label>
+                    <dynamic_group>1</dynamic_group>
                     <frontend_type>text</frontend_type>
                     <sort_order>7</sort_order>
                     <show_in_default>1</show_in_default>
@@ -590,6 +596,7 @@
                 </pledg_gateway_6>
                 <pledg_gateway_7 translate="label" module="aims_pledg">
                     <label>Pledg - 7th Payment Method</label>
+                    <dynamic_group>1</dynamic_group>
                     <frontend_type>text</frontend_type>
                     <sort_order>8</sort_order>
                     <show_in_default>1</show_in_default>
@@ -681,6 +688,7 @@
                 </pledg_gateway_7>
                 <pledg_gateway_8 translate="label" module="aims_pledg">
                     <label>Pledg - 8th Payment Method</label>
+                    <dynamic_group>1</dynamic_group>
                     <frontend_type>text</frontend_type>
                     <sort_order>9</sort_order>
                     <show_in_default>1</show_in_default>
